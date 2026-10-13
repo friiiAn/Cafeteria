@@ -1,4 +1,4 @@
-﻿# Implementation Plan: Sprint 4 — Ventanilla y cocina
+# Implementation Plan: Sprint 4 — Ventanilla y cocina
 
 **Branch**: `005-counter-kitchen` | **Date**: 2026-10-13 | **Spec**: [spec.md](./spec.md)
 
@@ -6,8 +6,8 @@
 
 ## Summary
 
-Habilitar la operación del día: la cajera registra pedidos de mostrador (sin ventana de 10
-minutos), los cobra en efectivo o tarjeta y los deja `Pagado`; la cocinera ve los pedidos por
+Habilitar la operación del día: el cajero registra pedidos de mostrador (sin ventana de 10
+minutos), los cobra en efectivo o tarjeta y los deja `Pagado`; el cocinero ve los pedidos por
 preparar, ordenados por hora de recolección, y los mueve por los estados
 `En preparación` → `Listo`. Se introduce una máquina de estados con transiciones atómicas y
 su historial. Traza a US4 y US5 de la spec maestra.
@@ -40,7 +40,7 @@ secuencia; sin pasarela externa en caja
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- **RBAC**: PASS — cobro para cajera/admin; preparación para cocinera/admin.
+- **RBAC**: PASS — cobro para cajero/admin; preparación para cocinero/admin.
 - **Integridad**: PASS — transacciones y `UPDATE ... AND estado_id`; historial por
   transición.
 - **Simplicidad**: PASS — máquina de estados en un servicio; sin bus de eventos.

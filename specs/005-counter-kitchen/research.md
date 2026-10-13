@@ -7,7 +7,7 @@
 ### 1. Tipo de pedido `mostrador`
 
 - **Decisión**: reutilizar la tabla `pedido` con `tipo = 'mostrador'`; `usuario_id` es la
-  cajera que lo registra (o un cliente genérico si no hay cuenta).
+  cajero que lo registra (o un cliente genérico si no hay cuenta).
 - **Razón**: evita una tabla paralela; el flujo de cocina es idéntico.
 
 ### 2. Cobro en caja sin pasarela
@@ -44,7 +44,7 @@
 
 - **Decisión**: `UPDATE pedido SET estado_id = ? WHERE id = ? AND estado_id = ?` y verificar
   `affectedRows = 1`.
-- **Razón**: evita que dos cocineras avancen el mismo pedido (FR-009).
+- **Razón**: evita que dos cocineros avancen el mismo pedido (FR-009).
 
 ### 8. Frontend
 

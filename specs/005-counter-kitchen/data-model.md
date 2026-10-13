@@ -22,11 +22,11 @@ Pendiente ──(pago online)──▶ Pagado ──▶ En preparación ──�
 
 | Desde | Hacia | Quién |
 |-------|-------|-------|
-| `Pendiente` | `Pagado` | sistema (pago) / cajera (cobro) |
-| `Pendiente` | `Cancelado` | cliente / cajera |
-| `Pagado` | `En preparación` | cocinera |
-| `En preparación` | `Listo` | cocinera |
-| `Listo` | `Entregado` | cajera (Sprint 5) |
+| `Pendiente` | `Pagado` | sistema (pago) / cajero (cobro) |
+| `Pendiente` | `Cancelado` | cliente / cajero |
+| `Pagado` | `En preparación` | cocinero |
+| `En preparación` | `Listo` | cocinero |
+| `Listo` | `Entregado` | cajero (Sprint 5) |
 
 Cualquier otra transición se rechaza con `409`.
 
@@ -36,7 +36,7 @@ Cualquier otra transición se rechaza con `409`.
 
 - `tipo`: `anticipado` | `mostrador`.
 - `estado_id`: cualquiera del catálogo.
-- `usuario_id`: cliente (anticipado) o cajera (mostrador).
+- `usuario_id`: cliente (anticipado) o cajero (mostrador).
 
 ### `pago` (cobro en caja)
 

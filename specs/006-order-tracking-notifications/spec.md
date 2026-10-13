@@ -1,4 +1,4 @@
-﻿# Feature Specification: Sprint 5 — Seguimiento y notificaciones
+# Feature Specification: Sprint 5 — Seguimiento y notificaciones
 
 **Feature Branch**: `006-order-tracking-notifications`
 
@@ -57,7 +57,7 @@ notificación para el cliente y que el correo se intenta enviar.
    enviar el correo y registra el resultado (`enviado`/`fallido`) con reintentos.
 3. **Given** un fallo en el envío, **When** se reintenta, **Then** un fallo nunca pierde la
    notificación (queda pendiente o marcada como fallida).
-4. **Given** un pedido `Listo`, **When** la cajera confirma la entrega, **Then** el pedido
+4. **Given** un pedido `Listo`, **When** el cajero confirma la entrega, **Then** el pedido
    pasa a `Entregado`.
 5. **Given** una notificación de un pedido ajeno, **When** el cliente consulta, **Then** no
    puede verla.
@@ -66,7 +66,7 @@ notificación para el cliente y que el correo se intenta enviar.
 
 ### User Story 3 - Confirmar la entrega y cerrar el ciclo (Priority: P2)
 
-La cajera confirma la entrega del pedido `Listo`, cerrándolo como `Entregado`.
+El cajero confirma la entrega del pedido `Listo`, cerrándolo como `Entregado`.
 
 **Why this priority**: Completa la operación y las métricas. Traza al cierre del ciclo y
 FR-034.
@@ -76,7 +76,7 @@ historial.
 
 **Acceptance Scenarios**:
 
-1. **Given** un pedido `Listo`, **When** la cajera confirma la entrega, **Then** el pedido
+1. **Given** un pedido `Listo`, **When** el cajero confirma la entrega, **Then** el pedido
    pasa a `Entregado` y se registra en el historial.
 2. **Given** un pedido que no está `Listo`, **When** se intenta entregar, **Then** el sistema
    lo rechaza con `409`.
@@ -107,7 +107,7 @@ historial.
 - **FR-006**: El sistema MUST reintentar el envío de la notificación si falla. (FR-038.)
 - **FR-007**: El sistema MUST registrar el resultado del envío (`enviado`/`fallido`) y el
   número de intentos. (FR-038.)
-- **FR-008**: El sistema MUST permitir a la cajera confirmar la entrega de un pedido `Listo`,
+- **FR-008**: El sistema MUST permitir al cajero confirmar la entrega de un pedido `Listo`,
   marcándolo `Entregado`. (FR-034.)
 - **FR-009**: El sistema MUST restringir la consulta de pedidos y notificaciones al dueño del
   recurso. (FR-004.)

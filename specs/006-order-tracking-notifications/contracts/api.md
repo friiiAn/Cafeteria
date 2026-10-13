@@ -54,12 +54,12 @@ Marca una notificación como leída (opcional).
 
 **200**: `{ "id": 7, "leida": true }`. **403** si no es del usuario.
 
-## Entrega (cajera / administrador)
+## Entrega (cajero / administrador)
 
 ### POST /api/caja/pedidos/:id/entregar
 `Listo` → `Entregado`.
 
-**Auth**: `cajera` | `administrador`.
+**Auth**: `cajero` | `administrador`.
 
 **200**: `{ "id": 55, "estado": "Entregado" }`. **409** si no está `Listo`.
 

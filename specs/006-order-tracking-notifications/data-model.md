@@ -41,7 +41,7 @@ parciales; se apoya en este para el worker de reintentos).
 - El envío de correo es best-effort: `estado_envio` refleja `enviado`/`fallido`; `intentos`
   cuenta los intentos.
 - Nunca se notifica un pedido `Cancelado`.
-- Un pedido `Listo` puede pasar a `Entregado` (cajera).
+- Un pedido `Listo` puede pasar a `Entregado` (cajero).
 - Las notificaciones solo son visibles para su `usuario_id`.
 
 ## Relaciones

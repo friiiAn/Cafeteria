@@ -5,7 +5,7 @@
 ## Prerrequisitos
 
 - Sprints 1–3 completados.
-- Usuarios de prueba con roles `cajera` y `cocinera` (seed de usuarios).
+- Usuarios de prueba con roles `cajero` y `cocinero` (seed de usuarios).
 - Menú del día publicado (Sprint 2).
 
 ## Levantar
@@ -17,14 +17,14 @@ cd frontend && npm install && npm run dev
 
 ## Flujo manual de verificación
 
-1. Iniciar sesión como **cajera** y abrir `/caja`.
+1. Iniciar sesión como **cajero** y abrir `/caja`.
 2. Armar un pedido de mostrador y cobrarlo en efectivo → pasa a `Pagado`.
-3. Iniciar sesión como **cocinera** y abrir `/cocina`.
+3. Iniciar sesión como **cocinero** y abrir `/cocina`.
 4. Verificar que el pedido aparece ordenado por hora de recolección.
 5. Iniciarlo → `En preparación`; terminarlo → `Listo`.
 6. Intentar iniciar un pedido ya `Listo` → error `409`.
 7. Intentar cobrar dos veces el mismo pedido → error `409`.
-8. Como **cajero/cocinera**, intentar acceder a rutas del otro rol → `403`.
+8. Como **cajero/cocinero**, intentar acceder a rutas del otro rol → `403`.
 
 ## Verificación de base de datos
 

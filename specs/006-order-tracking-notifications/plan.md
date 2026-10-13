@@ -1,4 +1,4 @@
-﻿# Implementation Plan: Sprint 5 — Seguimiento y notificaciones
+# Implementation Plan: Sprint 5 — Seguimiento y notificaciones
 
 **Branch**: `006-order-tracking-notifications` | **Date**: 2026-10-13 | **Spec**: [spec.md](./spec.md)
 
@@ -8,7 +8,7 @@
 
 Cerrar el ciclo de valor: el cliente consulta el estado y el historial de sus pedidos en
 `/mis-pedidos`, recibe una notificación en la app y por correo cuando el pedido pasa a
-`Listo` (con reintentos y registro del resultado), y la cajera confirma la entrega física
+`Listo` (con reintentos y registro del resultado), y el cajero confirma la entrega física
 (`Listo → Entregado`). Traza a US3 y FR-033..FR-038 de la spec maestra.
 
 ## Technical Context
@@ -39,7 +39,7 @@ sin notificación de pedidos cancelados
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **Fiabilidad**: PASS — notificación persistida antes del envío; reintentos; sin pérdida.
-- **Seguridad**: PASS — filtrado por `usuario_id`; entrega por rol cajera/admin.
+- **Seguridad**: PASS — filtrado por `usuario_id`; entrega por rol cajero/admin.
 - **Simplicidad**: PASS — sondeo y worker ligero; sin mensajería pesada.
 - **Integridad**: PASS — transiciones por la máquina de estados del Sprint 4.
 - **Testing**: PASS — Vitest cubre notificación, reintento y entrega.

@@ -1,4 +1,4 @@
-﻿---
+---
 
 description: "Task list for Sprint 5 — Seguimiento y notificaciones"
 ---
@@ -95,7 +95,7 @@ description: "Task list for Sprint 5 — Seguimiento y notificaciones"
 
 ## Phase 5: User Story 3 - Confirmar la entrega y cerrar el ciclo (Priority: P2)
 
-**Goal**: cajera confirma entrega `Listo → Entregado`.
+**Goal**: cajero confirma entrega `Listo → Entregado`.
 
 **Independent Test**: entregar un pedido `Listo`; no `Listo` → 409.
 
@@ -106,7 +106,7 @@ description: "Task list for Sprint 5 — Seguimiento y notificaciones"
 ### Implementation
 
 - [ ] T025 [US3] Implementar `pedidoService.entregar` con la máquina de estados (historial)
-- [ ] T026 [US3] Exponer `POST /api/caja/pedidos/:id/entregar` con `requireRole('cajera','administrador')`
+- [ ] T026 [US3] Exponer `POST /api/caja/pedidos/:id/entregar` con `requireRole('cajero','administrador')`
 - [ ] T027 [P] [US3] Añadir acción "Confirmar entrega" en `CajaPage`/`CocinaPage` del frontend
 
 **Checkpoint**: las tres historias funcionan de forma independiente.

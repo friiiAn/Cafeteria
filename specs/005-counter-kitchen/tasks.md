@@ -1,4 +1,4 @@
-﻿---
+---
 
 description: "Task list for Sprint 4 — Ventanilla y cocina"
 ---
@@ -47,7 +47,7 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ## Phase 3: User Story 1 - Pedido de mostrador con cobro en caja (Priority: P1) 🎯 MVP
 
-**Goal**: cajera registra y cobra pedidos de mostrador.
+**Goal**: cajero registra y cobra pedidos de mostrador.
 
 **Independent Test**: crear pedido de mostrador, cobrarlo, verificar `Pagado`; doble cobro → 409.
 
@@ -60,7 +60,7 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 - [ ] T009 [US1] Implementar `pedidoService.crearMostrador` (sin ventana mínima; total backend)
 - [ ] T010 [US1] Implementar `pedidoService.cobrarEnCaja` (transacción: pago + estado `Pagado` + historial)
-- [ ] T011 [US1] Implementar `cajaController` + `caja.routes.ts` con `requireRole('cajera','administrador')`
+- [ ] T011 [US1] Implementar `cajaController` + `caja.routes.ts` con `requireRole('cajero','administrador')`
 - [ ] T012 [P] [US1] Crear `CajaPage` (menú + armar pedido) en `frontend/src/pages/caja/CajaPage.tsx`
 - [ ] T013 [US1] Crear `CobroPage` (efectivo/tarjeta + confirmar) en `frontend/src/pages/caja/CobroPage.tsx`
 
@@ -70,7 +70,7 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ## Phase 4: User Story 2 - Ver y preparar pedidos en cocina (Priority: P1)
 
-**Goal**: cocinera mueve pedidos `Pagado → En preparación → Listo`.
+**Goal**: cocinero mueve pedidos `Pagado → En preparación → Listo`.
 
 **Independent Test**: iniciar y terminar un pedido; transición inválida → 409.
 
@@ -83,7 +83,7 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 - [ ] T016 [US2] Implementar `cocinaService.listar` (Pagado + En preparación, orden por hora de recolección)
 - [ ] T017 [US2] Implementar `cocinaService.iniciar` y `cocinaService.marcarListo` usando `transicionar`
-- [ ] T018 [US2] Implementar `cocinaController` + `cocina.routes.ts` con `requireRole('cocinera','administrador')`
+- [ ] T018 [US2] Implementar `cocinaController` + `cocina.routes.ts` con `requireRole('cocinero','administrador')`
 - [ ] T019 [US2] Crear `CocinaPage` (tablero + acciones iniciar/listo) en `frontend/src/pages/cocina/CocinaPage.tsx`
 
 **Checkpoint**: caja y cocina funcionan de forma independiente.

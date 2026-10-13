@@ -5,12 +5,12 @@
 Convenciones: `/api`, JSON, errores `{ "error": { "code", "message" } }`, `Authorization:
 Bearer <jwt>`.
 
-## Caja (cajera / administrador)
+## Caja (cajero / administrador)
 
 ### POST /api/caja/pedidos
 Registra un pedido de mostrador.
 
-**Auth**: `cajera` | `administrador`.
+**Auth**: `cajero` | `administrador`.
 
 **Body**:
 ```json
@@ -24,7 +24,7 @@ Registra un pedido de mostrador.
 ### POST /api/caja/pedidos/:id/cobrar
 Registra el cobro en efectivo o tarjeta y marca el pedido `Pagado`.
 
-**Auth**: `cajera` | `administrador`.
+**Auth**: `cajero` | `administrador`.
 
 **Body**: `{ "metodo": "efectivo" }`  (o `"tarjeta"`)
 
@@ -40,12 +40,12 @@ Cancela un pedido `Pendiente` en caja.
 
 **200**: `{ "id": 60, "estado": "Cancelado" }`. **409** si ya no es cancelable.
 
-## Cocina (cocinera / administrador)
+## Cocina (cocinero / administrador)
 
 ### GET /api/cocina/pedidos
 Pedidos por preparar (`Pagado`, `En preparación`) ordenados por hora de recolección.
 
-**Auth**: `cocinera` | `administrador`.
+**Auth**: `cocinero` | `administrador`.
 
 **200**:
 ```json

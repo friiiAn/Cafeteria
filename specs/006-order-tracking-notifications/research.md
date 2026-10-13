@@ -44,7 +44,7 @@
 ### 7. Seguridad de recursos
 
 - **Decisión**: todas las consultas de pedidos/notificaciones filtran por `usuario_id`;
-  la entrega requiere cajera/admin.
+  la entrega requiere cajero/admin.
 - **Razón**: FR-009/FR-004.
 
 ### 8. Frontend
