@@ -1,7 +1,7 @@
 import { describe, it, expect, afterAll, beforeAll } from "vitest";
 import request from "supertest";
 import { createApp } from "../../src/app.js";
-import { cerrarBaseDatos } from "../helpers/db.js";
+import { cerrarBaseDatos, eliminarUsuarioPorCorreo } from "../helpers/db.js";
 import { existeCorreo, createUsuario } from "../../src/db/usuarioRepository.js";
 import { hashPassword } from "../../src/utils/password.js";
 
@@ -21,6 +21,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  await eliminarUsuarioPorCorreo(CORREO);
   await cerrarBaseDatos();
 });
 

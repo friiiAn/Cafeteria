@@ -27,8 +27,8 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ## Phase 1: Setup
 
-- [ ] T001 Confirmar que sprints 1–3 compilan y pasan pruebas
-- [ ] T002 [P] Registrar routers `/api/caja` y `/api/cocina` en `backend/src/routes/`
+- [x] T001 Confirmar que sprints 1–3 compilan y pasan pruebas
+- [x] T002 [P] Registrar routers `/api/caja` y `/api/cocina` en `backend/src/routes/`
 
 ---
 
@@ -36,10 +36,10 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 **⚠️ CRITICAL**: completar antes de las historias.
 
-- [ ] T003 Verificar catálogo `estado_pedido` completo y `pago.pedido_id` UNIQUE
-- [ ] T004 Implementar mapa de transiciones permitidas en `backend/src/services/estadoService.ts`
-- [ ] T005 [P] Implementar helper `transicionar(pedidoId, desde, hacia)` atómico (UPDATE ... AND estado_id + historial)
-- [ ] T006 [P] Definir esquemas `zod` de mostrador y cobro en `backend/src/services/validators/`
+- [x] T003 Verificar catálogo `estado_pedido` completo y `pago.pedido_id` UNIQUE
+- [x] T004 Implementar mapa de transiciones permitidas en `backend/src/services/estadoService.ts`
+- [x] T005 [P] Implementar helper `transicionar(pedidoId, desde, hacia)` atómico (UPDATE ... AND estado_id + historial)
+- [x] T006 [P] Definir esquemas `zod` de mostrador y cobro en `backend/src/schemas/` (patrón existente del proyecto)
 
 **Checkpoint**: máquina de estados lista.
 
@@ -53,16 +53,16 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ### Tests
 
-- [ ] T007 [P] [US1] Integration test `POST /api/caja/pedidos` y `/cobrar` en `backend/tests/integration/caja.test.ts`
-- [ ] T008 [P] [US1] Integration test de doble cobro (`409`) y cobro sin rol (`403`)
+- [x] T007 [P] [US1] Integration test `POST /api/caja/pedidos` y `/cobrar` en `backend/tests/integration/caja.test.ts`
+- [x] T008 [P] [US1] Integration test de doble cobro (`409`) y cobro sin rol (`403`)
 
 ### Implementation
 
-- [ ] T009 [US1] Implementar `pedidoService.crearMostrador` (sin ventana mínima; total backend)
-- [ ] T010 [US1] Implementar `pedidoService.cobrarEnCaja` (transacción: pago + estado `Pagado` + historial)
-- [ ] T011 [US1] Implementar `cajaController` + `caja.routes.ts` con `requireRole('cajero','administrador')`
-- [ ] T012 [P] [US1] Crear `CajaPage` (menú + armar pedido) en `frontend/src/pages/caja/CajaPage.tsx`
-- [ ] T013 [US1] Crear `CobroPage` (efectivo/tarjeta + confirmar) en `frontend/src/pages/caja/CobroPage.tsx`
+- [x] T009 [US1] Implementar `pedidoService.crearMostrador` (sin ventana mínima; total backend)
+- [x] T010 [US1] Implementar `pedidoService.cobrarEnCaja` (transacción: pago + estado `Pagado` + historial)
+- [x] T011 [US1] Implementar `cajaController` + `caja.routes.ts` con `requireRole('cajero','administrador')`
+- [x] T012 [P] [US1] Crear `CajaPage` (menú + armar pedido) en `frontend/src/pages/caja/CajaPage.tsx`
+- [x] T013 [US1] Crear `CobroPage` (efectivo/tarjeta + confirmar) en `frontend/src/pages/caja/CobroPage.tsx`
 
 **Checkpoint**: mostrador y cobro funcionales.
 
@@ -76,15 +76,15 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ### Tests
 
-- [ ] T014 [P] [US2] Unit test del mapa de transiciones en `backend/tests/unit/estadoTransiciones.test.ts`
-- [ ] T015 [P] [US2] Integration test `GET /api/cocina/pedidos`, `/iniciar`, `/listo` en `backend/tests/integration/cocina.test.ts`
+- [x] T014 [P] [US2] Test del mapa de transiciones en `backend/tests/integration/estadoTransiciones.test.ts` (consulta la tabla `transicion_estado`)
+- [x] T015 [P] [US2] Integration test `GET /api/cocina/pedidos`, `/iniciar`, `/listo` en `backend/tests/integration/cocina.test.ts`
 
 ### Implementation
 
-- [ ] T016 [US2] Implementar `cocinaService.listar` (Pagado + En preparación, orden por hora de recolección)
-- [ ] T017 [US2] Implementar `cocinaService.iniciar` y `cocinaService.marcarListo` usando `transicionar`
-- [ ] T018 [US2] Implementar `cocinaController` + `cocina.routes.ts` con `requireRole('cocinero','administrador')`
-- [ ] T019 [US2] Crear `CocinaPage` (tablero + acciones iniciar/listo) en `frontend/src/pages/cocina/CocinaPage.tsx`
+- [x] T016 [US2] Implementar `cocinaService.listar` (Pagado + En preparación, orden por hora de recolección)
+- [x] T017 [US2] Implementar `cocinaService.iniciar` y `cocinaService.marcarListo` usando `transicionar`
+- [x] T018 [US2] Implementar `cocinaController` + `cocina.routes.ts` con `requireRole('cocinero','administrador')`
+- [x] T019 [US2] Crear `CocinaPage` (tablero + acciones iniciar/listo) en `frontend/src/pages/cocina/CocinaPage.tsx`
 
 **Checkpoint**: caja y cocina funcionan de forma independiente.
 
@@ -98,13 +98,13 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ### Tests
 
-- [ ] T020 [P] [US3] Integration test del orden por `fecha_recoleccion` en `backend/tests/integration/cocinaOrden.test.ts`
+- [x] T020 [P] [US3] Integration test del orden por `fecha_recoleccion` en `backend/tests/integration/cocinaOrden.test.ts`
 
 ### Implementation
 
-- [ ] T021 [US3] Añadir refetch periódico (5–10 s) en `CocinaPage`
-- [ ] T022 [P] [US3] Resaltar pedidos próximos a su hora de recolección en `CocinaPage`
-- [ ] T023 [US3] Optimizar consulta de cocina (índices por estado y fecha) en `cocinaService`
+- [x] T021 [US3] Añadir refetch periódico (5–10 s) en `CocinaPage`
+- [x] T022 [P] [US3] Resaltar pedidos próximos a su hora de recolección en `CocinaPage`
+- [x] T023 [US3] Optimizar consulta de cocina (índices por estado y fecha) en `cocinaService`
 
 **Checkpoint**: las tres historias funcionan de forma independiente.
 
@@ -112,10 +112,10 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] Documentar endpoints de caja y cocina en `backend/README.md`
-- [ ] T025 Sanear entradas y validar cantidades y métodos de pago
-- [ ] T026 Verificar que las transiciones concurrentes no duplican historial
-- [ ] T027 Ejecutar `npm test` y `npm run typecheck` en backend y frontend
+- [x] T024 [P] Documentar endpoints de caja y cocina en `backend/README.md`
+- [x] T025 Sanear entradas y validar cantidades y métodos de pago
+- [x] T026 Verificar que las transiciones concurrentes no duplican historial
+- [x] T027 Ejecutar `npm test` y `npm run typecheck` en backend y frontend
 
 ---
 
@@ -138,3 +138,8 @@ description: "Task list for Sprint 4 — Ventanilla y cocina"
 
 - Las transiciones usan `UPDATE ... AND estado_id` para evitar carreras.
 - El cobro en caja no usa `PaymentGateway`.
+- Desviaciones respecto al plan original:
+  - Los esquemas `zod` viven en `backend/src/schemas/` (no en `services/validators/`).
+  - El test del mapa de transiciones es de integración (necesita la tabla `transicion_estado`).
+  - La ampliación de `pago.metodo` a `tarjeta` se aplicó con la migración
+    `migrations/003_pago_metodo_tarjeta.sql` (el `CHECK` original no lo permitía).

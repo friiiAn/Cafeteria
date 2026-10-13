@@ -58,6 +58,7 @@ export interface PedidoResumen {
 }
 
 export interface PedidoDetalle extends PedidoResumen {
+  tipo: string;
   items: ItemPedido[];
   historial: HistorialEstado[];
 }
@@ -71,6 +72,20 @@ export interface PagoConfirmado {
     referencia: string | null;
     estado: string;
   };
+}
+
+export interface ItemCocina {
+  cantidad: number;
+  nombre: string;
+}
+
+export interface PedidoCocina {
+  id: number;
+  numero: string;
+  tipo: string;
+  estado: string;
+  fecha_recoleccion: string;
+  items: ItemCocina[];
 }
 
 export const RUTA_POR_ROL: Record<Rol, string> = {

@@ -3,6 +3,23 @@ import type { Express } from "express";
 
 export const PASSWORD_CLIENTE = "cliente123";
 
+export const CUENTAS = {
+  admin: { correo: "admin@itsh.edu.mx", password: "admin123" },
+  cajero: { correo: "caja@itsh.edu.mx", password: "caja123" },
+  cocinero: { correo: "cocina@itsh.edu.mx", password: "cocina123" },
+} as const;
+
+export async function login(
+  app: Express,
+  correo: string,
+  password: string,
+): Promise<string> {
+  const res = await request(app)
+    .post("/api/auth/login")
+    .send({ correo, password });
+  return res.body.token as string;
+}
+
 export async function registrarYLogin(
   app: Express,
   correo: string,

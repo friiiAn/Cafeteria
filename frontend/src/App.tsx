@@ -10,8 +10,9 @@ import { NotFoundPage } from "./pages/NotFoundPage";
 import { UsuariosPage } from "./pages/admin/UsuariosPage";
 import { PlatillosPage } from "./pages/admin/PlatillosPage";
 import { MenuDiaPage } from "./pages/admin/MenuDiaPage";
-import { CajaHome } from "./pages/caja/CajaHome";
-import { CocinaHome } from "./pages/cocina/CocinaHome";
+import { CajaPage } from "./pages/caja/CajaPage";
+import { CobroPage } from "./pages/caja/CobroPage";
+import { CocinaPage } from "./pages/cocina/CocinaPage";
 import { MenuPage } from "./pages/clientes/MenuPage";
 import { MisPedidosHome } from "./pages/clientes/MisPedidosHome";
 import { CarritoPage } from "./pages/clientes/CarritoPage";
@@ -68,7 +69,15 @@ export function App() {
           path="/caja"
           element={
             <ProtectedRoute roles={["cajero", "administrador"]}>
-              <CajaHome />
+              <CajaPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/caja/:id/cobro"
+          element={
+            <ProtectedRoute roles={["cajero", "administrador"]}>
+              <CobroPage />
             </ProtectedRoute>
           }
         />
@@ -76,7 +85,7 @@ export function App() {
           path="/cocina"
           element={
             <ProtectedRoute roles={["cocinero", "administrador"]}>
-              <CocinaHome />
+              <CocinaPage />
             </ProtectedRoute>
           }
         />

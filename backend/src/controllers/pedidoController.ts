@@ -1,13 +1,6 @@
 import type { Request, Response } from "express";
 import * as pedidoService from "../services/pedidoService.js";
-import { HttpError } from "../utils/httpError.js";
-
-function usuarioActual(req: Request): number {
-  if (!req.user) {
-    throw HttpError.unauthorized();
-  }
-  return req.user.id;
-}
+import { usuarioActual } from "../utils/requestUser.js";
 
 function textoQuery(valor: unknown): string | undefined {
   return typeof valor === "string" && valor.length > 0 ? valor : undefined;

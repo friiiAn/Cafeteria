@@ -10,6 +10,7 @@ import type {
 export interface PedidoBase extends RowDataPacket {
   id: number;
   numero: string;
+  tipo: string;
   usuario_id: number;
   estado_id: number;
   estado: string;
@@ -50,22 +51,29 @@ export async function crear(
   conn: DbExecutor,
   params: {
     numero: string;
+    tipo: "anticipado" | "mostrador";
     estadoId: number;
-    usuarioId: number;
-    fechaRecoleccion: string;
+    usuarioId: number | null;
+    clienteNombre: string | null;
+    fechaRecoleccion: string | null;
     total: number;
+    creadoPor: number | null;
   },
 ): Promise<number> {
   const result = await e(
     conn,
-    `INSERT INTO pedido (numero, tipo, estado_id, usuario_id, fecha_recoleccion, total)
-     VALUES (?, 'anticipado', ?, ?, ?, ?)`,
+    `INSERT INTO pedido
+       (numero, tipo, estado_id, usuario_id, cliente_nombre, fecha_recoleccion, total, creado_por)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       params.numero,
+      params.tipo,
       params.estadoId,
       params.usuarioId,
+      params.clienteNombre,
       params.fechaRecoleccion,
       params.total,
+      params.creadoPor,
     ],
   );
   return result.insertId;
@@ -120,6 +128,20 @@ export async function actualizarEstado(
   ]);
 }
 
+export async function cambiarEstadoCondicional(
+  conn: DbExecutor,
+  pedidoId: number,
+  desdeId: number,
+  haciaId: number,
+): Promise<number> {
+  const result = await e(
+    conn,
+    `UPDATE pedido SET estado_id = ? WHERE id = ? AND estado_id = ?`,
+    [haciaId, pedidoId, desdeId],
+  );
+  return result.affectedRows;
+}
+
 export async function existeNumero(
   conn: DbExecutor,
   numero: string,
@@ -135,18 +157,19 @@ export async function existeNumero(
 export async function contarDelDia(
   conn: DbExecutor,
   fecha: string,
+  prefijo: string,
 ): Promise<number> {
   const rows = await q<RowDataPacket[]>(
     conn,
-    "SELECT COUNT(*) AS total FROM pedido WHERE DATE(creado_en) = ?",
-    [fecha],
+    "SELECT COUNT(*) AS total FROM pedido WHERE DATE(creado_en) = ? AND numero LIKE ?",
+    [fecha, `${prefijo}-%`],
   );
   return Number(rows[0]?.total ?? 0);
 }
 
 export async function obtenerBase(id: number): Promise<PedidoBase | null> {
   const rows = await query<PedidoBase[]>(
-    `SELECT p.id, p.numero, p.usuario_id, p.estado_id, e.nombre AS estado,
+    `SELECT p.id, p.numero, p.tipo, p.usuario_id, p.estado_id, e.nombre AS estado,
             p.total, p.fecha_recoleccion
      FROM pedido p
      JOIN estado_pedido e ON e.id = p.estado_id
@@ -229,4 +252,46 @@ export async function listarPorUsuario(
     total: Number(row.total),
     fecha_recoleccion: formatoFechaHora(row.fecha_recoleccion),
   }));
+}
+
+export interface PedidoCocinaRow extends RowDataPacket {
+  id: number;
+  numero: string;
+  tipo: string;
+  estado: string;
+  fecha_recoleccion: Date | string;
+}
+
+export interface ItemCocinaRow extends RowDataPacket {
+  pedido_id: number;
+  cantidad: number;
+  nombre: string;
+}
+
+export async function listarParaCocina(): Promise<PedidoCocinaRow[]> {
+  return query<PedidoCocinaRow[]>(
+    `SELECT p.id, p.numero, p.tipo, e.nombre AS estado, p.fecha_recoleccion
+     FROM pedido p
+     JOIN estado_pedido e ON e.id = p.estado_id
+     WHERE e.nombre IN ('Pagado', 'En preparación')
+     ORDER BY p.fecha_recoleccion ASC, p.creado_en ASC`,
+  );
+}
+
+export async function listarItemsDePedidos(
+  pedidoIds: number[],
+): Promise<ItemCocinaRow[]> {
+  if (pedidoIds.length === 0) {
+    return [];
+  }
+  const placeholders = pedidoIds.map(() => "?").join(", ");
+  return query<ItemCocinaRow[]>(
+    `SELECT d.pedido_id, d.cantidad, COALESCE(pl.nombre, 'Platillo') AS nombre
+     FROM pedido_detalle d
+     LEFT JOIN menu_dia md ON md.id = d.menu_dia_id
+     LEFT JOIN platillo pl ON pl.id = md.platillo_id
+     WHERE d.pedido_id IN (${placeholders})
+     ORDER BY d.id ASC`,
+    pedidoIds,
+  );
 }

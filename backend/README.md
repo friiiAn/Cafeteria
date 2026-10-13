@@ -115,6 +115,37 @@ Reglas y códigos:
   datos de tarjeta, solo el `token_pago` del proveedor.
 - En desarrollo `PAYMENT_PROVIDER=mock`: `tok_ok_*` aprueba, `tok_fail_*` rechaza.
 
+## Endpoints (Sprint 4 — ventanilla y cocina)
+
+### Caja (rol `cajero` o `administrador`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/caja/pedidos` | Registra un pedido de mostrador (`cliente_nombre?`, `items[]`); sin ventana mínima; estado inicial `Pendiente` |
+| `GET` | `/caja/pedidos/:id` | Detalle del pedido para el cobro (sin verificación de propiedad) |
+| `POST` | `/caja/pedidos/:id/cobrar` | Cobra en caja (`metodo`: `efectivo` \| `tarjeta`); pasa el pedido a `Pagado` |
+| `POST` | `/caja/pedidos/:id/cancelar` | Cancela un pedido de mostrador mientras siga `Pendiente` |
+
+### Cocina (rol `cocinero` o `administrador`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/cocina/pedidos` | Pedidos `Pagado` y `En preparación`, ordenados por hora de recolección |
+| `POST` | `/cocina/pedidos/:id/iniciar` | `Pagado` → `En preparación` |
+| `POST` | `/cocina/pedidos/:id/listo` | `En preparación` → `Listo` |
+
+Reglas y códigos:
+
+- Los folios de mostrador usan el prefijo `M-` (los anticipados, `A-`); `fecha_recoleccion`
+  de un pedido de mostrador se fija al momento de crearlo.
+- El cobro en caja no usa `PaymentGateway`: inserta `pago` (`metodo` `efectivo`/`tarjeta`) y
+  cambia el estado en una transacción.
+- Pago único por pedido (`UNIQUE(pedido_id)`): doble cobro `409`; pedido no `Pendiente` `409`.
+- Transiciones de estado validadas contra la tabla `transicion_estado`; toda transición
+  inserta una fila en `pedido_estado_historial`. Una transición fuera de secuencia o
+  concurrente: `409`.
+- Pedido inexistente: `404`; sin el rol requerido: `403`; sin sesión: `401`.
+
 ### Utilidad
 
 | Método | Ruta | Descripción |

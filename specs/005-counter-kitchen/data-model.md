@@ -43,9 +43,13 @@ Cualquier otra transición se rechaza con `409`.
 - `metodo`: `efectivo` | `tarjeta` (además de `online` del Sprint 3).
 - `pedido_id`: `UNIQUE`.
 
+> Nota: el `CHECK chk_pago_metodo` original solo permitía `('online','efectivo')`. La
+> migración `003_pago_metodo_tarjeta.sql` lo amplía a `('online','efectivo','tarjeta')`.
+
 ### `pedido_estado_historial`
 
-- Una fila por cada transición, con `fecha`.
+- Una fila por cada transición, con `fecha`, `estado_anterior_id`, `estado_nuevo_id` y
+  `cambiado_por` (quién la provocó).
 
 ## Consultas principales
 
@@ -69,6 +73,10 @@ ORDER BY p.fecha_recoleccion ASC, p.creado_en ASC;
 ```sql
 UPDATE pedido SET estado_id = @nuevo
 WHERE id = ? AND estado_id = @actual;
--- si affectedRows = 0 → 409
-INSERT INTO pedido_estado_historial (pedido_id, estado_id) VALUES (?, @nuevo);
+-- Transaction: throw HttpError.conflict si affectedRows = 0
+INSERT INTO pedido_estado_historial (pedido_id, estado_anterior_id, estado_nuevo_id, cambiado_por)
+VALUES (?, @actual, @nuevo, @quien);
 ```
+
+> Índice real: `idx_pedido_fecha_recoleccion` (sobre `pedido.fecha_recoleccion`); las
+> transiciones se validan contra la tabla `transicion_estado` (ya sembrada).

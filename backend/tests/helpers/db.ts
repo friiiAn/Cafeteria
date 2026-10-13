@@ -29,6 +29,11 @@ export async function eliminarPlatilloPorNombre(nombre: string): Promise<void> {
   await pool.query("DELETE FROM platillo WHERE nombre = ?", [nombre]);
 }
 
+export async function eliminarPedidoPorId(pedidoId: number): Promise<void> {
+  await pool.query("DELETE FROM pago WHERE pedido_id = ?", [pedidoId]);
+  await pool.query("DELETE FROM pedido WHERE id = ?", [pedidoId]);
+}
+
 export async function eliminarMenuPorFecha(fecha: string): Promise<void> {
   await pool.query("DELETE FROM menu_dia WHERE fecha = ?", [fecha]);
 }

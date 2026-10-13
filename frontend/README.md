@@ -39,8 +39,9 @@ npm run typecheck  # verificación de tipos
 | `/admin` | administrador | Gestión de usuarios operativos |
 | `/admin/platillos` | administrador | Catálogo de platillos |
 | `/admin/menu` | administrador | Menú del día |
-| `/caja` | cajero | Módulo de caja |
-| `/cocina` | cocinero | Pantalla de cocina |
+| `/caja` | cajero | Armar y cobrar pedidos de mostrador |
+| `/caja/:id/cobro` | cajero | Cobro de un pedido de mostrador (efectivo/tarjeta) |
+| `/cocina` | cocinero | Tablero de cocina con acciones iniciar/listo |
 | `/menu` | cliente | Consulta del menú y armado del carrito |
 | `/carrito` | cliente | Resumen del pedido y hora de recolección |
 | `/pago/:id` | cliente | Detalle del pedido y pago en línea |

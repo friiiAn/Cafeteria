@@ -40,15 +40,17 @@ Desde la carpeta del proyecto, en PowerShell o CMD. El cliente `mysql` está en
 **PowerShell** (la redirección `<` no existe en PowerShell; usa `Get-Content` + pipe):
 
 ```powershell
-Get-Content migrations\001_crear_esquema.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
-Get-Content migrations\002_seed_inicial.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
+Get-Content migrations\001_crear_esquema.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
+Get-Content migrations\002_seed_inicial.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
+Get-Content migrations\003_pago_metodo_tarjeta.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
 ```
 
 **CMD**:
 
 ```bat
-mysql -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\001_crear_esquema.sql
-mysql -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\002_seed_inicial.sql
+mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\001_crear_esquema.sql
+mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\002_seed_inicial.sql
+mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\003_pago_metodo_tarjeta.sql
 ```
 
 Alternativa con `source` desde el propio cliente:
@@ -56,9 +58,10 @@ Alternativa con `source` desde el propio cliente:
 ```sql
 SOURCE C:/Users/frida/cafeteria/migrations/001_crear_esquema.sql;
 SOURCE C:/Users/frida/cafeteria/migrations/002_seed_inicial.sql;
+SOURCE C:/Users/frida/cafeteria/migrations/003_pago_metodo_tarjeta.sql;
 ```
 
-**Importante:** ejecutar `001` antes que `002`. El `001` crea las tablas; el `002` inserta los datos base (roles, estados, transiciones, platillos y menú de ejemplo).
+**Importante:** ejecutar en orden `001` → `002` → `003`. El `001` crea las tablas; el `002` inserta los datos base (roles, estados, transiciones, platillos y menú de ejemplo); el `003` amplía el `CHECK` de `pago.metodo` para permitir `tarjeta` en el cobro en caja (requiere MySQL 8.0.16+).
 
 ## Nota sobre los triggers
 
@@ -100,4 +103,5 @@ mysql -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh -e "SELECT md.fe
 
 - El `001` usa `CREATE TABLE` normal: si las tablas ya existen, fallará con "table already exists" (esto es esperado; no re-ejecutes `001` sobre una BD ya poblada sin antes limpiar). El bloque de triggers usa `DROP TRIGGER IF EXISTS`, por lo que esa parte sí es re-ejecutable.
 - El `002` es idempotente: usa `ON DUPLICATE KEY UPDATE`, `INSERT IGNORE` y `WHERE NOT EXISTS`, por lo que es seguro re-ejecutarlo.
+- Usa siempre `--default-character-set=utf8mb4` al ejecutar los scripts. Sin esta bandera, los caracteres acentuados (por ejemplo el estado `En preparación`) se pueden corromper a `??` si el cliente los interpreta con otra codificación.
 - El menú de ejemplo se inserta con la fecha actual (`CURRENT_DATE`). Para tener menú en otro día, ejecuta un `INSERT` manual en `menu_dia` con la fecha deseada.

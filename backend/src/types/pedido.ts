@@ -32,6 +32,7 @@ export interface PedidoResumen {
 }
 
 export interface PedidoDetalle extends PedidoResumen {
+  tipo: string;
   items: ItemPedido[];
   historial: HistorialEstado[];
 }
@@ -47,4 +48,18 @@ export interface PagoConfirmado {
   pedido_id: number;
   estado: string;
   pago: PagoInfo;
+}
+
+export interface ItemCocina {
+  cantidad: number;
+  nombre: string;
+}
+
+export interface PedidoCocina {
+  id: number;
+  numero: string;
+  tipo: string;
+  estado: string;
+  fecha_recoleccion: string;
+  items: ItemCocina[];
 }

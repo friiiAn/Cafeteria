@@ -4,6 +4,8 @@ import usuarioRoutes from "./usuario.routes.js";
 import platilloRoutes from "./platillo.routes.js";
 import menuRoutes from "./menu.routes.js";
 import pedidoRoutes from "./pedido.routes.js";
+import cajaRoutes from "./caja.routes.js";
+import cocinaRoutes from "./cocina.routes.js";
 
 const router = Router();
 
@@ -16,5 +18,7 @@ router.use("/usuarios", usuarioRoutes);
 router.use("/platillos", platilloRoutes);
 router.use("/menu", menuRoutes);
 router.use("/pedidos", pedidoRoutes);
+router.use("/caja", cajaRoutes);
+router.use("/cocina", cocinaRoutes);
 
 export default router;
