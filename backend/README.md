@@ -28,6 +28,10 @@ API REST del Sistema de Pedidos Anticipados (Node.js LTS + Express + TypeScript 
    | `PAYMENT_PROVIDER` | Proveedor de pago (`mock` en desarrollo) | `mock` |
    | `PAYMENT_API_KEY` | Clave del proveedor (vacía con `mock`) | (secreto) |
    | `MIN_LEAD_MINUTES` | Anticipación mínima de un pedido | `10` |
+   | `MAIL_PROVIDER` | Envío de correo (`console` en dev, `fail` simula errores) | `console` |
+   | `MAIL_FROM` | Remitente de las notificaciones | `Cafetería ITSH <no-reply@itsh.edu.mx>` |
+   | `NOTIFICACION_MAX_INTENTOS` | Reintentos máximos de envío | `5` |
+   | `NOTIFICACION_POLL_MS` | Frecuencia del worker de notificaciones (ms; `0` lo desactiva) | `15000` |
 
 ## Comandos
 
@@ -122,8 +126,10 @@ Reglas y códigos:
 | Método | Ruta | Descripción |
 |--------|------|-------------|
 | `POST` | `/caja/pedidos` | Registra un pedido de mostrador (`cliente_nombre?`, `items[]`); sin ventana mínima; estado inicial `Pendiente` |
+| `GET` | `/caja/pedidos` | Lista los pedidos `Listo` pendientes de entrega |
 | `GET` | `/caja/pedidos/:id` | Detalle del pedido para el cobro (sin verificación de propiedad) |
 | `POST` | `/caja/pedidos/:id/cobrar` | Cobra en caja (`metodo`: `efectivo` \| `tarjeta`); pasa el pedido a `Pagado` |
+| `POST` | `/caja/pedidos/:id/entregar` | `Listo` → `Entregado` |
 | `POST` | `/caja/pedidos/:id/cancelar` | Cancela un pedido de mostrador mientras siga `Pendiente` |
 
 ### Cocina (rol `cocinero` o `administrador`)
@@ -146,6 +152,32 @@ Reglas y códigos:
   concurrente: `409`.
 - Pedido inexistente: `404`; sin el rol requerido: `403`; sin sesión: `401`.
 
+## Endpoints (Sprint 5 — seguimiento y notificaciones)
+
+### Notificaciones (rol `usuario`)
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `GET` | `/notificaciones` | Lista las notificaciones propias, más recientes primero |
+| `POST` | `/notificaciones/:id/leer` | Marca una notificación propia como leída |
+
+Reglas y códigos:
+
+- Solo los pedidos **anticipados** generan notificación; se crea al pasar el pedido a
+  `Listo` (`cocinaService`), dentro de la misma transacción.
+- El `usuario_id` del pedido distingue al destinatario; pedido inexistente o ajenos:
+  `404`; notificación de otro usuario: `403`.
+- El `creado_en` de la API corresponde a la columna `fecha` de `notificacion`; el
+  `detalle_error` se expone como diagnóstico de envío. Los valores de `estado_envio`
+  son `pendiente`, `enviada` y `fallida` (este último tras agotar
+  `NOTIFICACION_MAX_INTENTOS`).
+- El **worker** (`notificacionWorker`) procesa las notificaciones `pendiente`
+  periódicamente (`NOTIFICACION_POLL_MS`; `0` lo desactiva). El transporte de correo es
+  un stub (`ConsoleMailer` / `FailMailer`) tras la interfaz `Mailer`; el SMTP real es un
+  punto de extensión documentado.
+- En el detalle de un pedido propio, un pedido ajeno devuelve `403` y uno inexistente
+  `404`; las acciones `pagar`/`cancelar` de un pedido ajeno siguen devolviendo `404`.
+
 ### Utilidad
 
 | Método | Ruta | Descripción |
@@ -160,7 +192,8 @@ src/
 ├── db/           # pool de MySQL y repositorios
 ├── middlewares/  # auth, validación, manejo de errores
 ├── controllers/  # capa HTTP
-├── services/     # lógica de negocio
+├── services/     # lógica de negocio (incluye mail/ y notificacionService)
+├── workers/      # workers en segundo plano (notificaciones)
 ├── routes/       # definición de rutas
 ├── schemas/      # esquemas de validación (zod)
 └── utils/        # jwt, password, logger, errores

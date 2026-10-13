@@ -2,6 +2,7 @@ import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 import { pool } from "./db/pool.js";
 import { logger } from "./utils/logger.js";
+import { iniciarNotificacionWorker } from "./workers/notificacionWorker.js";
 
 async function main(): Promise<void> {
   await pool.query("SELECT 1");
@@ -11,8 +12,11 @@ async function main(): Promise<void> {
     logger.info(`API escuchando en http://localhost:${env.PORT}/api`);
   });
 
+  const detenerWorker = iniciarNotificacionWorker();
+
   const apagar = (senal: string) => {
     logger.info(`Recibida señal ${senal}, cerrando...`);
+    detenerWorker();
     server.close(async () => {
       await pool.end();
       process.exit(0);

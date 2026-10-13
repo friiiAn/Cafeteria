@@ -55,12 +55,34 @@ export interface PedidoResumen {
   estado: string;
   total: number;
   fecha_recoleccion: string;
+  creado_en: string;
 }
 
 export interface PedidoDetalle extends PedidoResumen {
   tipo: string;
   items: ItemPedido[];
   historial: HistorialEstado[];
+}
+
+export interface PedidoEntrega {
+  id: number;
+  numero: string;
+  tipo: string;
+  cliente_nombre: string | null;
+  total: number;
+  fecha_recoleccion: string;
+}
+
+export interface Notificacion {
+  id: number;
+  usuario_id: number | null;
+  pedido_id: number;
+  tipo: string;
+  mensaje: string | null;
+  estado_envio: string;
+  intentos: number;
+  leida: boolean;
+  creado_en: string;
 }
 
 export interface PagoConfirmado {

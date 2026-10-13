@@ -3,6 +3,7 @@ import { useAuth } from "../../contexts/AuthContext";
 import { ETIQUETA_ROL, type Rol } from "../../types";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
+import { NotificacionBell } from "../NotificacionBell";
 
 interface Enlace {
   ruta: string;
@@ -61,6 +62,7 @@ export function AppLayout() {
               {ETIQUETA_ROL[usuario.rol]}
             </p>
           </div>
+          {usuario.rol === "usuario" && <NotificacionBell />}
           <Button variante="ghost" onClick={logout} className="px-3">
             Salir
           </Button>

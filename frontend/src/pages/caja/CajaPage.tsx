@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiError } from "../../lib/apiClient";
-import { hoyISO, formatoMoneda } from "../../lib/utils";
-import type { MenuEntrada, PedidoDetalle } from "../../types";
+import { hoyISO, formatoMoneda, formatoFechaHora } from "../../lib/utils";
+import type { MenuEntrada, PedidoDetalle, PedidoEntrega } from "../../types";
 import { PlatilloCard } from "../../components/PlatilloCard";
 import { Card, CardBody, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Badge } from "../../components/ui/badge";
+
+const INTERVALO_ENTREGAS_MS = 10000;
 
 export function CajaPage() {
   const navigate = useNavigate();
@@ -17,6 +20,9 @@ export function CajaPage() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [listos, setListos] = useState<PedidoEntrega[]>([]);
+  const [entregando, setEntregando] = useState<number | null>(null);
+  const [recargaListos, setRecargaListos] = useState(0);
 
   useEffect(() => {
     let activo = true;
@@ -41,6 +47,41 @@ export function CajaPage() {
       activo = false;
     };
   }, []);
+
+  useEffect(() => {
+    let activo = true;
+    async function cargarListos() {
+      try {
+        const data = await api.get<PedidoEntrega[]>("/caja/pedidos");
+        if (activo) {
+          setListos(data);
+        }
+      } catch {
+        /* silencioso: no bloquea la captura de mostrador */
+      }
+    }
+    void cargarListos();
+    const timer = window.setInterval(() => {
+      void cargarListos();
+    }, INTERVALO_ENTREGAS_MS);
+    return () => {
+      activo = false;
+      window.clearInterval(timer);
+    };
+  }, [recargaListos]);
+
+  async function entregar(pedido: PedidoEntrega): Promise<void> {
+    setError("");
+    setEntregando(pedido.id);
+    try {
+      await api.post(`/caja/pedidos/${pedido.id}/entregar`);
+      setRecargaListos((n) => n + 1);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "No se pudo entregar el pedido");
+    } finally {
+      setEntregando(null);
+    }
+  }
 
   const cantidadDe = (id: number): number => seleccion[id] ?? 0;
 
@@ -106,6 +147,39 @@ export function CajaPage() {
         <p role="alert" className="text-sm font-medium text-danger">
           {error}
         </p>
+      )}
+
+      {listos.length > 0 && (
+        <Card>
+          <CardBody className="space-y-3">
+            <CardTitle>Listos para entrega</CardTitle>
+            <ul className="divide-y divide-outline-variant">
+              {listos.map((pedido) => (
+                <li
+                  key={pedido.id}
+                  className="flex flex-wrap items-center gap-3 py-3"
+                >
+                  <div className="flex-1">
+                    <p className="font-semibold text-on-surface">{pedido.numero}</p>
+                    <p className="text-sm text-on-surface-variant">
+                      {pedido.cliente_nombre ?? "Cliente de mostrador"} ·{" "}
+                      {formatoFechaHora(pedido.fecha_recoleccion)}
+                    </p>
+                  </div>
+                  <Badge className="bg-tertiary-container text-on-tertiary-container">
+                    Listo
+                  </Badge>
+                  <Button
+                    disabled={entregando === pedido.id}
+                    onClick={() => void entregar(pedido)}
+                  >
+                    {entregando === pedido.id ? "Entregando…" : "Confirmar entrega"}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </CardBody>
+        </Card>
       )}
 
       {cargando ? (

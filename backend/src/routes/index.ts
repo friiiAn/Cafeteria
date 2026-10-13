@@ -6,6 +6,7 @@ import menuRoutes from "./menu.routes.js";
 import pedidoRoutes from "./pedido.routes.js";
 import cajaRoutes from "./caja.routes.js";
 import cocinaRoutes from "./cocina.routes.js";
+import notificacionRoutes from "./notificacion.routes.js";
 
 const router = Router();
 
@@ -20,5 +21,6 @@ router.use("/menu", menuRoutes);
 router.use("/pedidos", pedidoRoutes);
 router.use("/caja", cajaRoutes);
 router.use("/cocina", cocinaRoutes);
+router.use("/notificaciones", notificacionRoutes);
 
 export default router;

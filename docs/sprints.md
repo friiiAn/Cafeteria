@@ -1,7 +1,7 @@
 # Roadmap de Sprints — Sistema de Pedidos Anticipados Cafetería ITSH
 
 **Creado**: 2026-10-11
-**Spec maestra**: `specs/001-advance-order-system/spec.md`
+**Spec maestra**: `specs/001-sistema-pedidos-anticipados/spec.md`
 **Duración**: 5 sprints × 2 semanas (10 semanas)
 
 Cada sprint es una feature independiente de speckit con su propio directorio
@@ -20,15 +20,19 @@ sprint es un subconjunto trazable de ella (historias, FRs y criterios).
 
 ## Vista general
 
-| Sprint | Semanas (est.) | Feature speckit | Historias de 001 | Demo del sprint |
-|---|---|---|---|---|
-| 1 | 1–2 (2026-10-13 → 10-26) | `specs/002-foundation-auth/` | US6 + infraestructura | Login por rol y rutas protegidas |
-| 2 | 3–4 (2026-10-27 → 11-09) | `specs/003-menu-management/` | US7 + US1 | Admin publica el menú; alumno lo consulta en el móvil |
-| 3 | 5–6 (2026-11-10 → 11-23) | `specs/004-advance-orders-payment/` | US2 | Flujo alumno: menú → pedido → pago anticipado |
-| 4 | 7–8 (2026-11-24 → 12-07) | `specs/005-counter-kitchen/` | US3 + US4 | Cajero captura mostrador; cocina procesa en pantalla |
-| 5 | 9–10 (2026-12-08 → 12-21) | `specs/006-order-tracking-notifications/` | US5 + pulido | Notificación de pedido listo + demo completa |
+| Sprint | Semanas (est.) | Feature speckit | Historias de 001 | Estado | Demo del sprint |
+|---|---|---|---|---|---|
+| 1 | 1–2 (2026-10-13 → 10-26) | `specs/002-foundation-auth-roles/` | US6 + infraestructura | Implementado | Login por rol y rutas protegidas |
+| 2 | 3–4 (2026-10-27 → 11-09) | `specs/003-menu-management/` | US7 + US1 | Implementado | Admin publica el menú; alumno lo consulta en el móvil |
+| 3 | 5–6 (2026-11-10 → 11-23) | `specs/004-advance-orders-payment/` | US2 | Implementado | Flujo alumno: menú → pedido → pago anticipado |
+| 4 | 7–8 (2026-11-24 → 12-07) | `specs/005-counter-kitchen/` | US3 + US4 | Implementado | Cajero captura mostrador; cocina procesa en pantalla |
+| 5 | 9–10 (2026-12-08 → 12-21) | `specs/006-order-tracking-notifications/` | US5 + pulido | Implementado | Notificación de pedido listo + demo completa |
 
 > Las fechas son estimadas; se ajustan al calendario real del plantel.
+>
+> **Estado `Implementado`**: código y pruebas (`npm test` + `npm run typecheck`) en verde.
+> La columna *Demo del sprint* refleja la validación pendiente con la patrocinadora
+> (ver el guion de la demo final en `docs/demo-sprint5.md`).
 
 ---
 

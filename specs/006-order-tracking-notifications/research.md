@@ -12,8 +12,9 @@
 
 ### 2. Modelo de notificación en base de datos
 
-- **Decisión**: tabla `notificacion` con `estado_envio` (`pendiente`/`enviado`/`fallido`),
-  `intentos`, `tipo` y `pedido_id`/`usuario_id`.
+- **Decisión**: tabla `notificacion` con `estado_envio` (`pendiente`/`enviada`/`fallida`),
+  `intentos`, `tipo` y `pedido_id`/`usuario_id`. La migración `004` añade `usuario_id`,
+  `mensaje`, `intentos` y `leida` al esquema del `001` (que ya definía `canal` y `fecha`).
 - **Razón**: FR-007/FR-011; permite reintentos y nunca pierde el aviso.
 
 ### 3. Disparo de notificación al pasar a `Listo`
@@ -24,15 +25,16 @@
 
 ### 4. Abstracción de correo (`Mailer`)
 
-- **Decisión**: interfaz `Mailer` con `send()`; `ConsoleMailer` en dev y `SmtpMailer` en
-  producción, elegido por `MAIL_PROVIDER`.
+- **Decisión**: interfaz `Mailer` con `enviar()`; `ConsoleMailer` en dev (y `FailMailer`
+  para simular fallos), elegido por `MAIL_PROVIDER`. El SMTP real queda como punto de
+  extensión documentado (sin dependencia nueva en este sprint).
 - **Razón**: FR-005/FR-006; testeable y sustituible.
 
 ### 5. Reintentos de envío
 
-- **Decisión**: cola ligera: `enviarNotificacionesPendientes()` marca `intentos++` y
-  `estado_envio`; un temporizador/worker simple reintenta las `pendiente`/`fallido` con tope
-  de intentos.
+- **Decisión**: cola ligera: `enviarPendientes()` marca `intentos++` y
+  `estado_envio`; un worker (`notificacionWorker`, intervalo `NOTIFICACION_POLL_MS`) reintenta
+  las `pendiente`/`fallida` con tope de intentos.
 - **Razón**: FR-006/FR-007 sin infraestructura de mensajería pesada.
 
 ### 6. Entrega física (`Listo → Entregado`)
@@ -57,7 +59,7 @@
 
 | Riesgo | Mitigación |
 |--------|-----------|
-| Correo caído | Reintentos con tope + estado `fallido`; el flujo del pedido no se bloquea |
+| Correo caído | Reintentos con tope + estado `fallida`; el flujo del pedido no se bloquea |
 | Notificación perdida | Fila persistida antes del envío; worker reintenta |
 | Consultas ajenas | Filtrar por `usuario_id`; `403` |
 | Carga de refetch | Intervalo moderado (10–15 s) y consultas indexadas |

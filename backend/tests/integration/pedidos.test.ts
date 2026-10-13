@@ -139,12 +139,12 @@ describe("GET /api/pedidos", () => {
     expect(detalle.body.historial[0].estado_nuevo).toBe("Pendiente");
   });
 
-  it("no permite ver un pedido ajeno (404)", async () => {
+  it("no permite ver un pedido ajeno (403)", async () => {
     const creado = await crearPedido(clienteToken, 15);
     const res = await request(app)
       .get(`/api/pedidos/${creado.body.id}`)
       .set("Authorization", `Bearer ${otroToken}`);
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(403);
   });
 });
 

@@ -18,6 +18,8 @@ router.post(
   asyncHandler(cajaController.crear),
 );
 
+router.get("/pedidos", asyncHandler(cajaController.listarListos));
+
 router.get("/pedidos/:id", asyncHandler(cajaController.obtener));
 
 router.post(
@@ -27,5 +29,7 @@ router.post(
 );
 
 router.post("/pedidos/:id/cancelar", asyncHandler(cajaController.cancelar));
+
+router.post("/pedidos/:id/entregar", asyncHandler(cajaController.entregar));
 
 export default router;

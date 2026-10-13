@@ -1,5 +1,6 @@
 import * as pedidoRepo from "../db/pedidoRepository.js";
 import * as pedidoService from "./pedidoService.js";
+import * as notificacionService from "./notificacionService.js";
 import { formatoFechaHora } from "../utils/fecha.js";
 import type { ItemCocina, PedidoCocina } from "../types/pedido.js";
 
@@ -40,5 +41,12 @@ export async function marcarListo(
   pedidoId: number,
   cocineroId: number,
 ): Promise<{ id: number; estado: string }> {
-  return pedidoService.transicionar(pedidoId, "Listo", cocineroId);
+  return pedidoService.transicionar(
+    pedidoId,
+    "Listo",
+    cocineroId,
+    async (conn, pedido) => {
+      await notificacionService.crearParaPedidoListo(conn, pedido);
+    },
+  );
 }

@@ -10,6 +10,7 @@ import { hoyISO, formatoMySQL, formatoFechaHora } from "../utils/fecha.js";
 import type {
   ItemPedido,
   PedidoDetalle,
+  PedidoEntrega,
   PedidoResumen,
   PagoConfirmado,
 } from "../types/pedido.js";
@@ -183,6 +184,7 @@ async function construirDetalle(
     fecha_recoleccion: pedido.fecha_recoleccion
       ? formatoFechaHora(pedido.fecha_recoleccion)
       : "",
+    creado_en: formatoFechaHora(pedido.creado_en),
     items,
     historial,
   };
@@ -193,8 +195,11 @@ export async function obtener(
   pedidoId: number,
 ): Promise<PedidoDetalle> {
   const pedido = await pedidoRepo.obtenerBase(pedidoId);
-  if (!pedido || pedido.usuario_id !== usuarioId) {
+  if (!pedido) {
     throw HttpError.notFound("Pedido no encontrado");
+  }
+  if (pedido.usuario_id !== usuarioId) {
+    throw HttpError.forbidden("No tienes acceso a este pedido");
   }
   return construirDetalle(pedido);
 }
@@ -433,6 +438,10 @@ export async function transicionar(
   pedidoId: number,
   haciaNombre: string,
   cambiadoPor: number,
+  dentroTransaccion?: (
+    conn: DbExecutor,
+    pedido: pedidoRepo.PedidoBase,
+  ) => Promise<void>,
 ): Promise<{ id: number; estado: string }> {
   const pedido = await pedidoRepo.obtenerBase(pedidoId);
   if (!pedido) {
@@ -464,9 +473,31 @@ export async function transicionar(
       nuevoId: haciaId,
       cambiadoPor,
     });
+    if (dentroTransaccion) {
+      await dentroTransaccion(conn, pedido);
+    }
   });
 
   return { id: pedidoId, estado: haciaNombre };
+}
+
+export async function entregar(
+  pedidoId: number,
+  cajeroId: number,
+): Promise<{ id: number; estado: string }> {
+  return transicionar(pedidoId, "Entregado", cajeroId);
+}
+
+export async function listarParaEntrega(): Promise<PedidoEntrega[]> {
+  const filas = await pedidoRepo.listarListos();
+  return filas.map((fila) => ({
+    id: fila.id,
+    numero: fila.numero,
+    tipo: fila.tipo,
+    cliente_nombre: fila.cliente_nombre,
+    total: Number(fila.total),
+    fecha_recoleccion: formatoFechaHora(fila.fecha_recoleccion),
+  }));
 }
 
 function esErrorDuplicado(error: unknown): boolean {

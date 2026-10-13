@@ -45,10 +45,15 @@ npm run typecheck  # verificación de tipos
 | `/menu` | cliente | Consulta del menú y armado del carrito |
 | `/carrito` | cliente | Resumen del pedido y hora de recolección |
 | `/pago/:id` | cliente | Detalle del pedido y pago en línea |
-| `/mis-pedidos` | cliente | Seguimiento de pedidos propios |
+| `/mis-pedidos` | cliente | Seguimiento de pedidos propios (se refresca automáticamente) |
 
 Las rutas protegidas exigen sesión activa; si el rol no corresponde, el usuario es
 redirigido a su módulo.
+
+En las vistas de cliente, la barra superior incluye una campana de avisos
+(`NotificacionBell`) que sondea las notificaciones y las marca como leídas. La lista
+`/mis-pedidos` consulta el estado cada 12 s y muestra el timeline de cada pedido; la
+vista de caja muestra un panel «Listos para entrega» que se actualiza cada 10 s.
 
 ## Estructura
 

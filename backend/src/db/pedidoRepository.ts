@@ -11,11 +11,12 @@ export interface PedidoBase extends RowDataPacket {
   id: number;
   numero: string;
   tipo: string;
-  usuario_id: number;
+  usuario_id: number | null;
   estado_id: number;
   estado: string;
   total: string | number;
   fecha_recoleccion: Date | string;
+  creado_en: Date | string;
 }
 
 interface ItemRow extends RowDataPacket {
@@ -36,6 +37,16 @@ interface ResumenRow extends RowDataPacket {
   id: number;
   numero: string;
   estado: string;
+  total: string | number;
+  fecha_recoleccion: Date | string;
+  creado_en: Date | string;
+}
+
+export interface PedidoEntregaRow extends RowDataPacket {
+  id: number;
+  numero: string;
+  tipo: string;
+  cliente_nombre: string | null;
   total: string | number;
   fecha_recoleccion: Date | string;
 }
@@ -170,7 +181,7 @@ export async function contarDelDia(
 export async function obtenerBase(id: number): Promise<PedidoBase | null> {
   const rows = await query<PedidoBase[]>(
     `SELECT p.id, p.numero, p.tipo, p.usuario_id, p.estado_id, e.nombre AS estado,
-            p.total, p.fecha_recoleccion
+            p.total, p.fecha_recoleccion, p.creado_en
      FROM pedido p
      JOIN estado_pedido e ON e.id = p.estado_id
      WHERE p.id = ? LIMIT 1`,
@@ -238,11 +249,12 @@ export async function listarPorUsuario(
   }
 
   const rows = await query<ResumenRow[]>(
-    `SELECT p.id, p.numero, e.nombre AS estado, p.total, p.fecha_recoleccion
+    `SELECT p.id, p.numero, e.nombre AS estado, p.total, p.fecha_recoleccion,
+            p.creado_en
      FROM pedido p
      JOIN estado_pedido e ON e.id = p.estado_id
      WHERE ${condiciones.join(" AND ")}
-     ORDER BY p.id DESC`,
+     ORDER BY p.creado_en DESC, p.id DESC`,
     valores,
   );
   return rows.map((row) => ({
@@ -251,7 +263,18 @@ export async function listarPorUsuario(
     estado: row.estado,
     total: Number(row.total),
     fecha_recoleccion: formatoFechaHora(row.fecha_recoleccion),
+    creado_en: formatoFechaHora(row.creado_en),
   }));
+}
+
+export async function listarListos(): Promise<PedidoEntregaRow[]> {
+  return query<PedidoEntregaRow[]>(
+    `SELECT p.id, p.numero, p.tipo, p.cliente_nombre, p.total, p.fecha_recoleccion
+     FROM pedido p
+     JOIN estado_pedido e ON e.id = p.estado_id
+     WHERE e.nombre = 'Listo'
+     ORDER BY p.fecha_recoleccion ASC, p.creado_en ASC`,
+  );
 }
 
 export interface PedidoCocinaRow extends RowDataPacket {

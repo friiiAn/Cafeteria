@@ -54,7 +54,7 @@ notificación para el cliente y que el correo se intenta enviar.
 1. **Given** un pedido `En preparación`, **When** pasa a `Listo`, **Then** el sistema crea una
    notificación para el cliente dueño del pedido.
 2. **Given** una notificación creada, **When** el sistema procesa el envío, **Then** intenta
-   enviar el correo y registra el resultado (`enviado`/`fallido`) con reintentos.
+   enviar el correo y registra el resultado (`enviada`/`fallida`) con reintentos.
 3. **Given** un fallo en el envío, **When** se reintenta, **Then** un fallo nunca pierde la
    notificación (queda pendiente o marcada como fallida).
 4. **Given** un pedido `Listo`, **When** el cajero confirma la entrega, **Then** el pedido
@@ -105,7 +105,7 @@ historial.
 - **FR-004**: El sistema MUST notificar al cliente cuando el pedido pase a `Listo`. (FR-036.)
 - **FR-005**: El sistema MUST enviar la notificación por correo. (FR-037.)
 - **FR-006**: El sistema MUST reintentar el envío de la notificación si falla. (FR-038.)
-- **FR-007**: El sistema MUST registrar el resultado del envío (`enviado`/`fallido`) y el
+- **FR-007**: El sistema MUST registrar el resultado del envío (`enviada`/`fallida`) y el
   número de intentos. (FR-038.)
 - **FR-008**: El sistema MUST permitir al cajero confirmar la entrega de un pedido `Listo`,
   marcándolo `Entregado`. (FR-034.)
@@ -117,8 +117,9 @@ historial.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Notificación**: `id`, `usuario_id`, `pedido_id`, `mensaje`, `tipo` (`pedido_listo`),
-  `estado_envio` (`pendiente`/`enviado`/`fallido`), `intentos`, `creado_en`. Tabla
+- **Notificación**: `id`, `usuario_id` (nullable), `pedido_id`, `mensaje`, `tipo`
+  (`pedido_listo`), `canal` (`correo`), `estado_envio` (`pendiente`/`enviada`/`fallida`),
+  `intentos`, `leida`, `fecha` (expuesta como `creado_en`), `detalle_error`. Tabla
   `notificacion`.
 - **Pedido** (extendida): estados `Listo` y `Entregado`; expuesto en seguimiento.
 - **Historial de estado**: fuente del timeline del cliente.
@@ -140,8 +141,8 @@ historial.
 
 - El seguimiento se actualiza por sondeo (refetch) o SSE; el tiempo real por push es opcional
   en este sprint.
-- El correo se envía mediante una abstracción `Mailer` (SMTP/consola en desarrollo,
-  proveedor real en producción con `SMTP_*` o `MAIL_API_KEY`).
+- El correo se envía mediante una abstracción `Mailer` (`ConsoleMailer`/`FailMailer` en
+  desarrollo; el proveedor real —SMTP u otro— es un punto de extensión documentado).
 - La notificación en app se modela como fila en `notificacion` con `estado_envio`.
 - El mostrador sin cuenta no tiene correo; su notificación queda en app o se omite el correo.
 - La base de datos es MySQL 8.0+ (ver `migrations/`).

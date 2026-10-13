@@ -43,6 +43,7 @@ Desde la carpeta del proyecto, en PowerShell o CMD. El cliente `mysql` está en
 Get-Content migrations\001_crear_esquema.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
 Get-Content migrations\002_seed_inicial.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
 Get-Content migrations\003_pago_metodo_tarjeta.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
+Get-Content migrations\004_notificacion_seguimiento.sql -Raw | & "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh
 ```
 
 **CMD**:
@@ -51,6 +52,7 @@ Get-Content migrations\003_pago_metodo_tarjeta.sql -Raw | & "C:\Program Files\My
 mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\001_crear_esquema.sql
 mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\002_seed_inicial.sql
 mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\003_pago_metodo_tarjeta.sql
+mysql --default-character-set=utf8mb4 -u cafe_admin -pcafeContra -h 127.0.0.1 -P 3306 cafe_itsh < migrations\004_notificacion_seguimiento.sql
 ```
 
 Alternativa con `source` desde el propio cliente:
@@ -59,9 +61,10 @@ Alternativa con `source` desde el propio cliente:
 SOURCE C:/Users/frida/cafeteria/migrations/001_crear_esquema.sql;
 SOURCE C:/Users/frida/cafeteria/migrations/002_seed_inicial.sql;
 SOURCE C:/Users/frida/cafeteria/migrations/003_pago_metodo_tarjeta.sql;
+SOURCE C:/Users/frida/cafeteria/migrations/004_notificacion_seguimiento.sql;
 ```
 
-**Importante:** ejecutar en orden `001` → `002` → `003`. El `001` crea las tablas; el `002` inserta los datos base (roles, estados, transiciones, platillos y menú de ejemplo); el `003` amplía el `CHECK` de `pago.metodo` para permitir `tarjeta` en el cobro en caja (requiere MySQL 8.0.16+).
+**Importante:** ejecutar en orden `001` → `002` → `003` → `004`. El `001` crea las tablas; el `002` inserta los datos base (roles, estados, transiciones, platillos y menú de ejemplo); el `003` amplía el `CHECK` de `pago.metodo` para permitir `tarjeta` en el cobro en caja (requiere MySQL 8.0.16+); el `004` completa la tabla `notificacion` con las columnas de seguimiento (`usuario_id`, `mensaje`, `intentos`, `leida`), una restricción única `(pedido_id, tipo)` y un índice por usuario.
 
 ## Nota sobre los triggers
 

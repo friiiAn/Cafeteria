@@ -29,6 +29,16 @@ export interface PedidoResumen {
   estado: string;
   total: number;
   fecha_recoleccion: string;
+  creado_en: string;
+}
+
+export interface PedidoEntrega {
+  id: number;
+  numero: string;
+  tipo: string;
+  cliente_nombre: string | null;
+  total: number;
+  fecha_recoleccion: string;
 }
 
 export interface PedidoDetalle extends PedidoResumen {

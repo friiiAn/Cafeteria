@@ -68,29 +68,35 @@ specs/006-order-tracking-notifications/
 ```text
 backend/src/
 ├── services/
-│   ├── seguimientoService.ts
+│   ├── pedidoService.ts         # extendido: obtener (403 ajeno), entregar, listarParaEntrega
 │   ├── notificacionService.ts
-│   └── mail/{Mailer,ConsoleMailer,SmtpMailer,index}.ts
+│   └── mail/{Mailer,ConsoleMailer,FailMailer,index}.ts
+├── db/
+│   └── notificacionRepository.ts
 ├── controllers/
-│   ├── pedidoController.ts     # extendido: detalle con timeline
+│   ├── pedidoController.ts      # extendido: detalle con timeline
+│   ├── cajaController.ts        # extendido: listarListos, entregar
 │   └── notificacionController.ts
 ├── routes/
-│   ├── pedido.routes.ts        # extendido
+│   ├── pedido.routes.ts         # extendido
+│   ├── caja.routes.ts           # extendido
 │   └── notificacion.routes.ts
 └── workers/notificacionWorker.ts
 
 backend/tests/
-├── unit/{notificacionRetry,mailer}.test.ts
+├── unit/mailer.test.ts
 └── integration/{seguimiento,notificaciones,entrega}.test.ts
 
 frontend/src/
 ├── pages/clientes/MisPedidosHome.tsx
+├── pages/caja/CajaPage.tsx      # extendido: panel «Listos para entrega»
 ├── components/{PedidoCard,EstadoTimeline,NotificacionBell}.tsx
 └── lib/notificaciones.ts
 ```
 
 **Structure Decision**: extiende la estructura existente; añade módulo `mail/`, `workers/`
-y componentes de seguimiento.
+y componentes de seguimiento. El seguimiento se resuelve reutilizando `pedidoService` /
+`pedidoRepository` (sin un `seguimientoService` aparte).
 
 ## Complexity Tracking
 

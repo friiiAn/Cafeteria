@@ -11,6 +11,10 @@ const envSchema = z.object({
   PAYMENT_PROVIDER: z.enum(["mock", "stripe"]).default("mock"),
   PAYMENT_API_KEY: z.string().default(""),
   MIN_LEAD_MINUTES: z.coerce.number().int().nonnegative().default(10),
+  MAIL_PROVIDER: z.enum(["console", "fail"]).default("console"),
+  MAIL_FROM: z.string().default("Cafetería ITSH <no-reply@itsh.edu.mx>"),
+  NOTIFICACION_MAX_INTENTOS: z.coerce.number().int().positive().default(5),
+  NOTIFICACION_POLL_MS: z.coerce.number().int().nonnegative().default(15000),
 });
 
 const parsed = envSchema.safeParse(process.env);

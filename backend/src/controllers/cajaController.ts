@@ -12,6 +12,19 @@ export async function obtener(req: Request, res: Response): Promise<void> {
   res.status(200).json(pedido);
 }
 
+export async function listarListos(_req: Request, res: Response): Promise<void> {
+  const pedidos = await pedidoService.listarParaEntrega();
+  res.status(200).json(pedidos);
+}
+
+export async function entregar(req: Request, res: Response): Promise<void> {
+  const resultado = await pedidoService.entregar(
+    Number(req.params.id),
+    usuarioActual(req),
+  );
+  res.status(200).json(resultado);
+}
+
 export async function cobrar(req: Request, res: Response): Promise<void> {
   const resultado = await pedidoService.cobrarEnCaja(
     Number(req.params.id),
