@@ -17,6 +17,7 @@ const ENLACES: Enlace[] = [
   { ruta: "/caja", etiqueta: "Caja", roles: ["cajero"] },
   { ruta: "/cocina", etiqueta: "Cocina", roles: ["cocinero"] },
   { ruta: "/menu", etiqueta: "Menú", roles: ["usuario"] },
+  { ruta: "/carrito", etiqueta: "Carrito", roles: ["usuario"] },
   { ruta: "/mis-pedidos", etiqueta: "Mis pedidos", roles: ["usuario"] },
 ];
 

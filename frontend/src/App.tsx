@@ -14,6 +14,8 @@ import { CajaHome } from "./pages/caja/CajaHome";
 import { CocinaHome } from "./pages/cocina/CocinaHome";
 import { MenuPage } from "./pages/clientes/MenuPage";
 import { MisPedidosHome } from "./pages/clientes/MisPedidosHome";
+import { CarritoPage } from "./pages/clientes/CarritoPage";
+import { PagoPage } from "./pages/clientes/PagoPage";
 
 function InicioRedirect() {
   const { usuario, cargando } = useAuth();
@@ -91,6 +93,22 @@ export function App() {
           element={
             <ProtectedRoute roles={["usuario", "administrador"]}>
               <MisPedidosHome />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/carrito"
+          element={
+            <ProtectedRoute roles={["usuario", "administrador"]}>
+              <CarritoPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pago/:id"
+          element={
+            <ProtectedRoute roles={["usuario", "administrador"]}>
+              <PagoPage />
             </ProtectedRoute>
           }
         />

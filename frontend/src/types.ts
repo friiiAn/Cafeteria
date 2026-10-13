@@ -35,6 +35,44 @@ export interface MenuEntrada {
   especial: boolean;
 }
 
+export interface ItemPedido {
+  menu_dia_id: number;
+  nombre: string;
+  cantidad: number;
+  precio_unitario: number;
+  subtotal: number;
+}
+
+export interface HistorialEstado {
+  estado_anterior: string | null;
+  estado_nuevo: string;
+  fecha: string;
+}
+
+export interface PedidoResumen {
+  id: number;
+  numero: string;
+  estado: string;
+  total: number;
+  fecha_recoleccion: string;
+}
+
+export interface PedidoDetalle extends PedidoResumen {
+  items: ItemPedido[];
+  historial: HistorialEstado[];
+}
+
+export interface PagoConfirmado {
+  pedido_id: number;
+  estado: string;
+  pago: {
+    metodo: string;
+    monto: number;
+    referencia: string | null;
+    estado: string;
+  };
+}
+
 export const RUTA_POR_ROL: Record<Rol, string> = {
   administrador: "/admin",
   cajero: "/caja",

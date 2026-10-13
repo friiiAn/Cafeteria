@@ -31,7 +31,7 @@ cd frontend && npm install && npm run dev
 ```sql
 SELECT numero, estado_id, total FROM pedido ORDER BY id DESC LIMIT 5;
 SELECT pedido_id, precio_unitario, subtotal FROM pedido_detalle ORDER BY id DESC LIMIT 5;
-SELECT pedido_id, monto, estado, referencia FROM pago ORDER BY id DESC LIMIT 5;
+SELECT pedido_id, monto, referencia FROM pago ORDER BY id DESC LIMIT 5;
 ```
 
 ## Pruebas

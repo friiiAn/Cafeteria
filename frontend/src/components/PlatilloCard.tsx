@@ -6,11 +6,19 @@ import { Button } from "./ui/button";
 
 interface PlatilloCardProps {
   entrada: MenuEntrada;
-  onSeleccionar?: (entrada: MenuEntrada) => void;
+  cantidad?: number;
+  onAgregar?: (entrada: MenuEntrada) => void;
+  onCambiarCantidad?: (entrada: MenuEntrada, cantidad: number) => void;
 }
 
-export function PlatilloCard({ entrada, onSeleccionar }: PlatilloCardProps) {
-  const seleccionable = entrada.disponible && Boolean(onSeleccionar);
+export function PlatilloCard({
+  entrada,
+  cantidad = 0,
+  onAgregar,
+  onCambiarCantidad,
+}: PlatilloCardProps) {
+  const seleccionable =
+    entrada.disponible && Boolean(onAgregar || onCambiarCantidad);
 
   return (
     <Card className={cn("h-full", !entrada.disponible && "opacity-60")}>
@@ -45,15 +53,40 @@ export function PlatilloCard({ entrada, onSeleccionar }: PlatilloCardProps) {
               No disponible
             </Badge>
           )}
-          {onSeleccionar && (
-            <Button
-              variante="secondary"
-              disabled={!seleccionable}
-              onClick={() => onSeleccionar(entrada)}
-              className="ml-auto h-9 min-h-0 px-4 text-sm"
-            >
-              Agregar
-            </Button>
+
+          {seleccionable && cantidad > 0 && onCambiarCantidad ? (
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variante="secondary"
+                aria-label={`Quitar uno de ${entrada.nombre}`}
+                disabled={!entrada.disponible}
+                onClick={() => onCambiarCantidad(entrada, cantidad - 1)}
+                className="h-9 min-h-0 w-9 px-0 text-lg"
+              >
+                −
+              </Button>
+              <span className="min-w-6 text-center font-semibold">{cantidad}</span>
+              <Button
+                variante="secondary"
+                aria-label={`Agregar uno de ${entrada.nombre}`}
+                disabled={!entrada.disponible}
+                onClick={() => onCambiarCantidad(entrada, cantidad + 1)}
+                className="h-9 min-h-0 w-9 px-0 text-lg"
+              >
+                +
+              </Button>
+            </div>
+          ) : (
+            onAgregar && (
+              <Button
+                variante="secondary"
+                disabled={!seleccionable}
+                onClick={() => onAgregar(entrada)}
+                className="ml-auto h-9 min-h-0 px-4 text-sm"
+              >
+                Agregar
+              </Button>
+            )
           )}
         </div>
       </CardBody>

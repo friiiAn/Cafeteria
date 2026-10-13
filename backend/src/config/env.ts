@@ -8,6 +8,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(8, "JWT_SECRET debe tener al menos 8 caracteres"),
   JWT_EXPIRES_IN: z.string().default("8h"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
+  PAYMENT_PROVIDER: z.enum(["mock", "stripe"]).default("mock"),
+  PAYMENT_API_KEY: z.string().default(""),
+  MIN_LEAD_MINUTES: z.coerce.number().int().nonnegative().default(10),
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -49,6 +49,46 @@ export async function listarPorFecha(
   return rows.map(map);
 }
 
+export interface MenuEntradaPedido {
+  id: number;
+  platillo_id: number;
+  nombre: string;
+  precio: number;
+  disponible: boolean;
+  platillo_activo: boolean;
+}
+
+interface MenuPedidoRow extends RowDataPacket {
+  id: number;
+  platillo_id: number;
+  nombre: string;
+  precio: string | number;
+  disponible: number;
+  activo: number;
+}
+
+export async function listarPorIds(ids: number[]): Promise<MenuEntradaPedido[]> {
+  if (ids.length === 0) {
+    return [];
+  }
+  const placeholders = ids.map(() => "?").join(", ");
+  const rows = await query<MenuPedidoRow[]>(
+    `SELECT md.id, md.platillo_id, p.nombre, md.precio, md.disponible, p.activo
+     FROM menu_dia md
+     JOIN platillo p ON p.id = md.platillo_id
+     WHERE md.id IN (${placeholders})`,
+    ids,
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    platillo_id: row.platillo_id,
+    nombre: row.nombre,
+    precio: Number(row.precio),
+    disponible: Boolean(row.disponible),
+    platillo_activo: Boolean(row.activo),
+  }));
+}
+
 export async function findById(id: number): Promise<MenuEntrada | null> {
   const rows = await query<MenuRow[]>(
     `${SELECT_BASE} WHERE md.id = ? LIMIT 1`,

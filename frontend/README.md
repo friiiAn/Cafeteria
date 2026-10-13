@@ -37,10 +37,14 @@ npm run typecheck  # verificación de tipos
 | `/login` | pública | Inicio de sesión |
 | `/register` | pública | Registro de cliente |
 | `/admin` | administrador | Gestión de usuarios operativos |
+| `/admin/platillos` | administrador | Catálogo de platillos |
+| `/admin/menu` | administrador | Menú del día |
 | `/caja` | cajero | Módulo de caja |
 | `/cocina` | cocinero | Pantalla de cocina |
-| `/menu` | cliente | Consulta del menú |
-| `/mis-pedidos` | cliente | Seguimiento de pedidos |
+| `/menu` | cliente | Consulta del menú y armado del carrito |
+| `/carrito` | cliente | Resumen del pedido y hora de recolección |
+| `/pago/:id` | cliente | Detalle del pedido y pago en línea |
+| `/mis-pedidos` | cliente | Seguimiento de pedidos propios |
 
 Las rutas protegidas exigen sesión activa; si el rol no corresponde, el usuario es
 redirigido a su módulo.
@@ -53,7 +57,7 @@ src/
 │   ├── ui/          # primitives estilo shadcn/ui
 │   └── layouts/     # layouts de autenticación y de la app
 ├── contexts/        # AuthContext (sesión)
-├── lib/             # apiClient, utilidades
+├── lib/             # apiClient, carrito, utilidades
 ├── pages/           # páginas por rol
 │   ├── admin/
 │   ├── caja/

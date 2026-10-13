@@ -25,6 +25,9 @@ API REST del Sistema de Pedidos Anticipados (Node.js LTS + Express + TypeScript 
    | `JWT_SECRET` | Clave de firma de JWT | (secreto) |
    | `JWT_EXPIRES_IN` | Vigencia del token | `8h` |
    | `CORS_ORIGIN` | Origen permitido (frontend) | `http://localhost:5173` |
+   | `PAYMENT_PROVIDER` | Proveedor de pago (`mock` en desarrollo) | `mock` |
+   | `PAYMENT_API_KEY` | Clave del proveedor (vacía con `mock`) | (secreto) |
+   | `MIN_LEAD_MINUTES` | Anticipación mínima de un pedido | `10` |
 
 ## Comandos
 
@@ -88,6 +91,29 @@ Base: `/api`. Errores: `{ "error": { "code", "message" } }`.
 
 Reglas: un platillo solo puede agregarse una vez por fecha (`409`); el precio debe ser
 numérico y no negativo (`400`); un platillo inactivo no aparece en `/menu/cliente`.
+
+## Endpoints (Sprint 3 — pedidos y pago)
+
+Requieren sesión autenticada. Cada pedido es privado de su dueño (verificación de propiedad).
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| `POST` | `/pedidos` | Crea un pedido anticipado (`fecha_recoleccion`, `items[]`); estado inicial `Pendiente` |
+| `GET` | `/pedidos` | Lista los pedidos propios (filtros opcionales `?estado=`, `?desde=`, `?hasta=`) |
+| `GET` | `/pedidos/:id` | Detalle de un pedido propio con `items` e `historial` |
+| `POST` | `/pedidos/:id/pagar` | Paga en línea (`token_pago`); pasa el pedido a `Pagado` |
+| `POST` | `/pedidos/:id/cancelar` | Cancela un pedido propio mientras siga `Pendiente` |
+
+Reglas y códigos:
+
+- El `total` y los `precio_unitario` se calculan en el backend; el cliente no puede fijarlos.
+- Ventana mínima `MIN_LEAD_MINUTES` sobre `fecha_recoleccion` (`409` si no se cumple).
+- Platillo no disponible o inactivo: `409`.
+- Pago rechazado: `402` y el pedido continúa `Pendiente`. Pedido ya no `Pendiente`: `409`.
+- Pedido inexistente o ajeno: `404`.
+- El pago (`pago`) es único por pedido (`UNIQUE(pedido_id)`); nunca se reciben ni almacenan
+  datos de tarjeta, solo el `token_pago` del proveedor.
+- En desarrollo `PAYMENT_PROVIDER=mock`: `tok_ok_*` aprueba, `tok_fail_*` rechaza.
 
 ### Utilidad
 

@@ -1,14 +1,18 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, ApiError } from "../../lib/apiClient";
-import { hoyISO } from "../../lib/utils";
+import { hoyISO, formatoMoneda } from "../../lib/utils";
+import { agregar, cambiarCantidad, useCarrito } from "../../lib/carrito";
 import type { MenuEntrada } from "../../types";
 import { PlatilloCard } from "../../components/PlatilloCard";
 import { Card, CardBody, CardTitle } from "../../components/ui/card";
+import { Button } from "../../components/ui/button";
 
 export function MenuPage() {
   const [entradas, setEntradas] = useState<MenuEntrada[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+  const { items, total, cantidad } = useCarrito();
 
   useEffect(() => {
     let activo = true;
@@ -34,10 +38,13 @@ export function MenuPage() {
     };
   }, []);
 
+  const cantidadDe = (id: number): number =>
+    items.find((item) => item.menu_dia_id === id)?.cantidad ?? 0;
+
   const especiales = entradas.filter((entrada) => entrada.especial);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <div>
         <h1 className="font-display text-2xl font-bold text-on-surface">
           Menú del día
@@ -71,7 +78,13 @@ export function MenuPage() {
               </h2>
               <div className="grid gap-4 sm:grid-cols-2">
                 {especiales.map((entrada) => (
-                  <PlatilloCard key={entrada.id} entrada={entrada} />
+                  <PlatilloCard
+                    key={entrada.id}
+                    entrada={entrada}
+                    cantidad={cantidadDe(entrada.id)}
+                    onAgregar={agregar}
+                    onCambiarCantidad={(e, c) => cambiarCantidad(e.id, c)}
+                  />
                 ))}
               </div>
             </section>
@@ -83,10 +96,32 @@ export function MenuPage() {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {entradas.map((entrada) => (
-                <PlatilloCard key={entrada.id} entrada={entrada} />
+                <PlatilloCard
+                  key={entrada.id}
+                  entrada={entrada}
+                  cantidad={cantidadDe(entrada.id)}
+                  onAgregar={agregar}
+                  onCambiarCantidad={(e, c) => cambiarCantidad(e.id, c)}
+                />
               ))}
             </div>
           </section>
+        </div>
+      )}
+
+      {cantidad > 0 && (
+        <div className="fixed inset-x-0 bottom-0 border-t border-outline-variant bg-surface-container-lowest">
+          <div className="mx-auto flex w-full max-w-5xl items-center gap-4 px-4 py-3">
+            <span className="text-sm font-medium text-on-surface-variant">
+              {cantidad} artículo{cantidad === 1 ? "" : "s"}
+            </span>
+            <span className="font-display text-lg font-bold text-primary">
+              {formatoMoneda(total)}
+            </span>
+            <Link to="/carrito" className="ml-auto">
+              <Button>Ir al carrito</Button>
+            </Link>
+          </div>
         </div>
       )}
     </div>
