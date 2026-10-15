@@ -1,21 +1,25 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { api, ApiError } from "../../lib/apiClient";
 import type { Platillo } from "../../types";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-import { Card, CardBody, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardBody, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
+import { Chip } from "../../components/ui/chip";
 
 export function PlatillosPage() {
   const [platillos, setPlatillos] = useState<Platillo[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [categoria, setCategoria] = useState<string | null>(null);
 
+  const [formAbierto, setFormAbierto] = useState(false);
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [nombre, setNombre] = useState("");
-  const [categoria, setCategoria] = useState("");
+  const [categoriaForm, setCategoriaForm] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [enviando, setEnviando] = useState(false);
 
@@ -33,42 +37,40 @@ export function PlatillosPage() {
 
   useEffect(() => {
     let activo = true;
-    async function cargarInicial() {
-      try {
-        const lista = await api.get<Platillo[]>("/platillos");
-        if (activo) {
-          setPlatillos(lista);
-        }
-      } catch (err) {
-        if (activo) {
-          setError(err instanceof ApiError ? err.message : "Error al cargar");
-        }
-      } finally {
-        if (activo) {
-          setCargando(false);
-        }
+    async function iniciar() {
+      if (activo) {
+        await cargar();
       }
     }
-    void cargarInicial();
+    void iniciar();
     return () => {
       activo = false;
     };
   }, []);
 
-  function limpiarFormulario() {
+  function cerrarFormulario() {
+    setFormAbierto(false);
     setEditandoId(null);
     setNombre("");
-    setCategoria("");
+    setCategoriaForm("");
     setDescripcion("");
   }
 
-  function editar(platillo: Platillo) {
-    setEditandoId(platillo.id);
-    setNombre(platillo.nombre);
-    setCategoria(platillo.categoria ?? "");
-    setDescripcion(platillo.descripcion ?? "");
+  function nuevo() {
     setError("");
     setMensaje("");
+    cerrarFormulario();
+    setFormAbierto(true);
+  }
+
+  function editar(platillo: Platillo) {
+    setError("");
+    setMensaje("");
+    setEditandoId(platillo.id);
+    setNombre(platillo.nombre);
+    setCategoriaForm(platillo.categoria ?? "");
+    setDescripcion(platillo.descripcion ?? "");
+    setFormAbierto(true);
   }
 
   async function guardar(event: FormEvent) {
@@ -78,7 +80,7 @@ export function PlatillosPage() {
     setEnviando(true);
     const payload = {
       nombre,
-      categoria: categoria.trim() || null,
+      categoria: categoriaForm.trim() || null,
       descripcion: descripcion.trim() || null,
     };
     try {
@@ -89,7 +91,7 @@ export function PlatillosPage() {
         await api.put(`/platillos/${editandoId}`, payload);
         setMensaje("Platillo actualizado correctamente");
       }
-      limpiarFormulario();
+      cerrarFormulario();
       await cargar();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "No se pudo guardar");
@@ -108,114 +110,201 @@ export function PlatillosPage() {
     }
   }
 
+  const categorias = useMemo(
+    () =>
+      Array.from(
+        new Set(platillos.map((p) => p.categoria).filter((c): c is string => Boolean(c))),
+      ),
+    [platillos],
+  );
+
+  const filtrados = useMemo(() => {
+    const termino = busqueda.trim().toLowerCase();
+    return platillos.filter((p) => {
+      if (categoria && p.categoria !== categoria) {
+        return false;
+      }
+      if (termino && !p.nombre.toLowerCase().includes(termino)) {
+        return false;
+      }
+      return true;
+    });
+  }, [platillos, busqueda, categoria]);
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>{editandoId === null ? "Nuevo platillo" : "Editar platillo"}</CardTitle>
-        </CardHeader>
-        <CardBody>
-          <form onSubmit={guardar} className="grid gap-4 sm:grid-cols-2" noValidate>
-            <div>
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input
-                id="nombre"
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="categoria">Categoría</Label>
-              <Input
-                id="categoria"
-                value={categoria}
-                onChange={(e) => setCategoria(e.target.value)}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Label htmlFor="descripcion">Descripción</Label>
-              <Input
-                id="descripcion"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-3 sm:col-span-2">
-              <Button type="submit" disabled={enviando}>
-                {enviando ? "Guardando…" : editandoId === null ? "Crear platillo" : "Guardar cambios"}
-              </Button>
-              {editandoId !== null && (
-                <Button variante="ghost" onClick={limpiarFormulario}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl font-bold text-on-surface">
+            Catálogo de platillos
+          </h1>
+          <p className="text-sm text-on-surface-variant">
+            El precio se asigna al publicarlo en el menú del día.
+          </p>
+        </div>
+        <Button onClick={nuevo}>Nuevo platillo</Button>
+      </div>
+
+      {formAbierto && (
+        <Card>
+          <CardBody className="space-y-4">
+            <CardTitle>
+              {editandoId === null ? "Nuevo platillo" : "Editar platillo"}
+            </CardTitle>
+            <form onSubmit={guardar} className="grid gap-4 sm:grid-cols-2" noValidate>
+              <div>
+                <Label htmlFor="nombre">Nombre</Label>
+                <Input
+                  id="nombre"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="categoria">Categoría</Label>
+                <Input
+                  id="categoria"
+                  value={categoriaForm}
+                  onChange={(e) => setCategoriaForm(e.target.value)}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <Label htmlFor="descripcion">Descripción</Label>
+                <Input
+                  id="descripcion"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-3 sm:col-span-2">
+                <Button type="submit" disabled={enviando}>
+                  {enviando
+                    ? "Guardando…"
+                    : editandoId === null
+                      ? "Crear platillo"
+                      : "Guardar cambios"}
+                </Button>
+                <Button variante="ghost" onClick={cerrarFormulario}>
                   Cancelar
                 </Button>
-              )}
-            </div>
-          </form>
-          {error && (
-            <p role="alert" className="mt-3 text-sm font-medium text-danger">
-              {error}
-            </p>
-          )}
-          {mensaje && <p className="mt-3 text-sm font-medium text-primary">{mensaje}</p>}
-        </CardBody>
-      </Card>
+              </div>
+            </form>
+          </CardBody>
+        </Card>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Catálogo de platillos</CardTitle>
-        </CardHeader>
-        <CardBody>
-          {cargando ? (
-            <p className="text-on-surface-variant">Cargando…</p>
-          ) : platillos.length === 0 ? (
-            <p className="text-on-surface-variant">Todavía no hay platillos registrados.</p>
-          ) : (
-            <ul className="divide-y divide-outline-variant">
-              {platillos.map((platillo) => (
-                <li
-                  key={platillo.id}
-                  className="flex items-center justify-between gap-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold text-on-surface">
-                      {platillo.nombre}
-                    </p>
-                    <p className="truncate text-sm text-on-surface-variant">
-                      {platillo.categoria ?? "Sin categoría"}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge
-                      className={
-                        platillo.activo
-                          ? "bg-primary-container text-on-primary-container"
-                          : "bg-surface-container text-on-surface-variant"
-                      }
-                    >
-                      {platillo.activo ? "Activo" : "Inactivo"}
-                    </Badge>
-                    <Button
-                      variante="ghost"
-                      onClick={() => editar(platillo)}
-                      className="h-9 min-h-0 px-3 text-sm"
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      variante="secondary"
-                      onClick={() => alternarActivo(platillo)}
-                      className="h-9 min-h-0 px-3 text-sm"
-                    >
-                      {platillo.activo ? "Desactivar" : "Activar"}
-                    </Button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardBody>
-      </Card>
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="buscar-platillo">Buscar platillo</Label>
+          <Input
+            id="buscar-platillo"
+            type="search"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            className="mt-1"
+          />
+        </div>
+        {categorias.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            <Chip activo={categoria === null} onClick={() => setCategoria(null)}>
+              Todas
+            </Chip>
+            {categorias.map((c) => (
+              <Chip
+                key={c}
+                activo={categoria === c}
+                onClick={() => setCategoria(categoria === c ? null : c)}
+              >
+                {c}
+              </Chip>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger bg-danger-container px-4 py-3"
+        >
+          <p className="text-sm font-medium text-on-danger-container">{error}</p>
+          <Button
+            variante="secondary"
+            className="h-9 min-h-0 px-4 text-sm"
+            onClick={() => void cargar()}
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
+      {mensaje && <p className="text-sm font-medium text-primary">{mensaje}</p>}
+
+      {cargando ? (
+        <p className="text-sm text-on-surface-variant">Cargando…</p>
+      ) : platillos.length === 0 ? (
+        <Card>
+          <CardBody className="flex flex-col items-center gap-2 py-10 text-center">
+            <p className="font-heading text-lg font-bold text-on-surface">
+              El catálogo está vacío
+            </p>
+            <Button onClick={nuevo}>Nuevo platillo</Button>
+          </CardBody>
+        </Card>
+      ) : filtrados.length === 0 ? (
+        <p className="text-sm text-on-surface-variant">
+          Sin resultados para “{busqueda || categoria}”.
+        </p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {filtrados.map((platillo) => (
+            <Card key={platillo.id} className={!platillo.activo ? "opacity-60" : ""}>
+              <CardBody className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-heading text-lg font-bold text-on-surface">
+                    {platillo.nombre}
+                  </h3>
+                  <Badge
+                    className={
+                      platillo.activo
+                        ? "bg-primary-container text-on-primary-container"
+                        : "bg-surface-container text-on-surface-variant"
+                    }
+                  >
+                    {platillo.activo ? "Activo" : "Inactivo"}
+                  </Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Badge className="bg-secondary-container text-on-secondary-container">
+                    {platillo.categoria ?? "Sin categoría"}
+                  </Badge>
+                </div>
+                {platillo.descripcion && (
+                  <p className="text-sm text-on-surface-variant">
+                    {platillo.descripcion}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Button
+                    variante="secondary"
+                    onClick={() => editar(platillo)}
+                    className="h-9 min-h-0 px-3 text-sm"
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variante="ghost"
+                    onClick={() => void alternarActivo(platillo)}
+                    className="h-9 min-h-0 px-3 text-sm"
+                  >
+                    {platillo.activo ? "Desactivar" : "Activar"}
+                  </Button>
+                </div>
+              </CardBody>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

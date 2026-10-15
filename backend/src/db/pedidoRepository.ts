@@ -48,6 +48,7 @@ export interface PedidoEntregaRow extends RowDataPacket {
   tipo: string;
   cliente_nombre: string | null;
   total: string | number;
+  creado_en: Date | string;
   fecha_recoleccion: Date | string;
 }
 
@@ -269,7 +270,8 @@ export async function listarPorUsuario(
 
 export async function listarListos(): Promise<PedidoEntregaRow[]> {
   return query<PedidoEntregaRow[]>(
-    `SELECT p.id, p.numero, p.tipo, p.cliente_nombre, p.total, p.fecha_recoleccion
+    `SELECT p.id, p.numero, p.tipo, p.cliente_nombre, p.total,
+            p.creado_en, p.fecha_recoleccion
      FROM pedido p
      JOIN estado_pedido e ON e.id = p.estado_id
      WHERE e.nombre = 'Listo'
@@ -282,6 +284,8 @@ export interface PedidoCocinaRow extends RowDataPacket {
   numero: string;
   tipo: string;
   estado: string;
+  cliente_nombre: string | null;
+  creado_en: Date | string;
   fecha_recoleccion: Date | string;
 }
 
@@ -293,10 +297,16 @@ export interface ItemCocinaRow extends RowDataPacket {
 
 export async function listarParaCocina(): Promise<PedidoCocinaRow[]> {
   return query<PedidoCocinaRow[]>(
-    `SELECT p.id, p.numero, p.tipo, e.nombre AS estado, p.fecha_recoleccion
+    `SELECT p.id, p.numero, p.tipo, e.nombre AS estado,
+            CASE
+              WHEN p.tipo = 'anticipado' THEN COALESCE(p.cliente_nombre, u.nombre)
+              ELSE p.cliente_nombre
+            END AS cliente_nombre,
+            p.creado_en, p.fecha_recoleccion
      FROM pedido p
      JOIN estado_pedido e ON e.id = p.estado_id
-     WHERE e.nombre IN ('Pagado', 'En preparación')
+     LEFT JOIN usuario u ON u.id = p.usuario_id
+     WHERE e.nombre IN ('Pagado', 'En preparación', 'Listo')
      ORDER BY p.fecha_recoleccion ASC, p.creado_en ASC`,
   );
 }

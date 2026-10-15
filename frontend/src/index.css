@@ -3,6 +3,10 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --text-stat-lg: 2rem;
+  --text-stat-lg--line-height: 2.5rem;
 
   --color-surface: #f6f1e9;
   --color-surface-dim: #e4ddd2;

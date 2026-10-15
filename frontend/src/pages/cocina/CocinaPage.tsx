@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import { api, ApiError } from "../../lib/apiClient";
-import { cn, formatoFechaHora } from "../../lib/utils";
 import type { PedidoCocina } from "../../types";
 import { Card, CardBody } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
+import { PedidoCocinaCard } from "../../components/PedidoCocinaCard";
 
-const INTERVALO_MS = 7000;
-const MINUTOS_AVISO = 15;
-
-function minutosRestantes(fecha: string): number {
-  const objetivo = new Date(fecha.replace(" ", "T")).getTime();
-  return (objetivo - Date.now()) / 60_000;
-}
+const INTERVALO_MS = 4000;
+const FALLOS_PARA_OFFLINE = 2;
 
 export function CocinaPage() {
   const [pedidos, setPedidos] = useState<PedidoCocina[]>([]);
@@ -20,6 +14,9 @@ export function CocinaPage() {
   const [error, setError] = useState("");
   const [procesando, setProcesando] = useState<number | null>(null);
   const [recarga, setRecarga] = useState(0);
+  const [ultimaActualizacion, setUltimaActualizacion] = useState<number | null>(null);
+  const [fallos, setFallos] = useState(0);
+  const [, setTick] = useState(0);
 
   useEffect(() => {
     let activo = true;
@@ -29,12 +26,15 @@ export function CocinaPage() {
         if (activo) {
           setPedidos(data);
           setError("");
+          setFallos(0);
+          setUltimaActualizacion(Date.now());
         }
       } catch (err) {
         if (activo) {
           setError(
             err instanceof ApiError ? err.message : "Error al cargar los pedidos",
           );
+          setFallos((n) => n + 1);
         }
       } finally {
         if (activo) {
@@ -46,9 +46,13 @@ export function CocinaPage() {
     const timer = window.setInterval(() => {
       void cargar();
     }, INTERVALO_MS);
+    const reloj = window.setInterval(() => {
+      setTick((n) => n + 1);
+    }, 1000);
     return () => {
       activo = false;
       window.clearInterval(timer);
+      window.clearInterval(reloj);
     };
   }, [recarga]);
 
@@ -59,22 +63,46 @@ export function CocinaPage() {
     try {
       await api.post(`/cocina/pedidos/${pedido.id}/${accion}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "No se pudo actualizar el pedido");
+      setError(
+        err instanceof ApiError ? err.message : "No se pudo actualizar el pedido",
+      );
     } finally {
       setProcesando(null);
       setRecarga((n) => n + 1);
     }
   }
 
+  const sinConexion = fallos >= FALLOS_PARA_OFFLINE;
+  const [ahora] = useState(() => Date.now());
+  const segundos = ultimaActualizacion
+    ? Math.max(0, Math.floor((ahora - ultimaActualizacion) / 1000))
+    : null;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-on-surface">
-            Pedidos en cocina
+          <h1 className="font-heading text-2xl font-bold text-on-surface">
+            Cocina
           </h1>
-          <p className="text-sm text-on-surface-variant">
-            Se actualiza automáticamente cada {INTERVALO_MS / 1000} segundos.
+          <p className="flex flex-wrap items-center gap-x-2 text-sm text-on-surface-variant">
+            <span className="inline-flex items-center gap-1">
+              <span
+                className="inline-block h-2 w-2 rounded-full bg-primary"
+                aria-hidden="true"
+              />
+              {pedidos.length} {pedidos.length === 1 ? "pedido" : "pedidos"}
+            </span>
+            <span aria-hidden="true">·</span>
+            {sinConexion ? (
+              <span className="font-semibold text-danger">
+                Sin conexión — reintentando…
+              </span>
+            ) : (
+              <span>
+                act. {segundos === null ? "…" : `hace ${segundos} s`}
+              </span>
+            )}
           </p>
         </div>
         <Button variante="secondary" onClick={() => setRecarga((n) => n + 1)}>
@@ -83,94 +111,48 @@ export function CocinaPage() {
       </div>
 
       {error && (
-        <p role="alert" className="text-sm font-medium text-danger">
-          {error}
-        </p>
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger bg-danger-container px-4 py-3"
+        >
+          <p className="text-sm font-medium text-on-danger-container">{error}</p>
+          <Button
+            variante="secondary"
+            className="h-9 min-h-0 px-4 text-sm"
+            onClick={() => setRecarga((n) => n + 1)}
+          >
+            Reintentar
+          </Button>
+        </div>
       )}
 
       {cargando ? (
-        <p className="text-on-surface-variant">Cargando…</p>
+        <p className="text-sm text-on-surface-variant">Cargando pedidos…</p>
       ) : pedidos.length === 0 ? (
         <Card>
-          <CardBody>
-            <p className="text-on-surface-variant">
-              No hay pedidos pagados pendientes de preparación.
+          <CardBody className="flex flex-col items-center gap-2 py-12 text-center">
+            <span aria-hidden="true" className="text-4xl">
+              ✓
+            </span>
+            <p className="font-heading text-lg font-bold text-on-surface">
+              ¡Todo está al día!
+            </p>
+            <p className="text-sm text-on-surface-variant">
+              No hay pedidos en cocina. Los pedidos pagados aparecen aquí solos.
             </p>
           </CardBody>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {pedidos.map((pedido) => {
-            const restantes = minutosRestantes(pedido.fecha_recoleccion);
-            const vencido = restantes < 0;
-            const proximo = !vencido && restantes <= MINUTOS_AVISO;
-            return (
-              <Card
-                key={pedido.id}
-                className={cn(
-                  vencido && "border-danger",
-                  proximo && "border-tertiary",
-                )}
-              >
-                <CardBody className="space-y-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <p className="font-display text-lg font-bold text-on-surface">
-                        {pedido.numero}
-                      </p>
-                      <p className="text-xs font-medium tracking-wide text-on-surface-variant uppercase">
-                        {pedido.tipo}
-                      </p>
-                    </div>
-                    <Badge className="bg-primary-container text-on-primary-container">
-                      {pedido.estado}
-                    </Badge>
-                  </div>
-
-                  <p
-                    className={cn(
-                      "text-sm",
-                      vencido
-                        ? "font-semibold text-danger"
-                        : proximo
-                          ? "font-semibold text-tertiary"
-                          : "text-on-surface-variant",
-                    )}
-                  >
-                    Recolección: {formatoFechaHora(pedido.fecha_recoleccion)}
-                    {vencido
-                      ? " · ¡Vencido!"
-                      : proximo
-                        ? ` · en ${Math.ceil(restantes)} min`
-                        : ""}
-                  </p>
-
-                  <ul className="divide-y divide-outline-variant rounded-lg border border-outline-variant">
-                    {pedido.items.map((item) => (
-                      <li key={item.nombre} className="flex items-center gap-2 px-3 py-2">
-                        <span className="font-semibold text-on-surface">
-                          {item.cantidad}×
-                        </span>
-                        <span className="text-on-surface">{item.nombre}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Button
-                    className="w-full"
-                    disabled={procesando === pedido.id}
-                    onClick={() => void avanzar(pedido)}
-                  >
-                    {procesando === pedido.id
-                      ? "Guardando…"
-                      : pedido.estado === "Pagado"
-                        ? "Iniciar preparación"
-                        : "Marcar listo"}
-                  </Button>
-                </CardBody>
-              </Card>
-            );
-          })}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {pedidos.map((pedido) => (
+            <PedidoCocinaCard
+              key={pedido.id}
+              pedido={pedido}
+              ahora={ahora}
+              ocupado={procesando === pedido.id}
+              onAvanzar={(p) => void avanzar(p)}
+            />
+          ))}
         </div>
       )}
     </div>

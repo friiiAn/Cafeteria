@@ -8,12 +8,12 @@ import { Button } from "./ui/button";
 import { EstadoTimeline } from "./EstadoTimeline";
 
 const COLOR_ESTADO: Record<string, string> = {
-  Pendiente: "bg-secondary-container text-on-secondary-container",
-  Pagado: "bg-primary-container text-on-primary-container",
-  "En preparación": "bg-tertiary-container text-on-tertiary-container",
-  Listo: "bg-tertiary-container text-on-tertiary-container",
-  Entregado: "bg-surface-container text-on-surface-variant",
-  Cancelado: "bg-danger-container text-on-danger-container",
+  Pendiente: "bg-status-pending text-white",
+  Pagado: "bg-status-paid text-white",
+  "En preparación": "bg-status-preparing text-white",
+  Listo: "bg-status-ready text-white",
+  Entregado: "bg-status-delivered text-white",
+  Cancelado: "bg-status-cancelled text-white",
 };
 
 export function PedidoCard({
@@ -45,7 +45,11 @@ export function PedidoCard({
   }
 
   return (
-    <Card className={cn(pedido.estado === "Listo" && "border-tertiary")}>
+    <Card
+      className={cn(
+        pedido.estado === "Listo" && "border-status-ready shadow-md",
+      )}
+    >
       <CardBody className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <div className="flex-1">
@@ -63,8 +67,8 @@ export function PedidoCard({
         </div>
 
         {pedido.estado === "Listo" && (
-          <p className="rounded-lg bg-tertiary-container px-3 py-2 text-sm font-medium text-on-tertiary-container">
-            ¡Tu pedido está listo para recoger!
+          <p className="rounded-lg bg-status-ready px-3 py-2 text-sm font-semibold text-white">
+            ¡Listo para recoger!
           </p>
         )}
 

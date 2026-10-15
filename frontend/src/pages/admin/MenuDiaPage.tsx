@@ -4,11 +4,11 @@ import { formatoMoneda, hoyISO } from "../../lib/utils";
 import type { MenuEntrada, Platillo } from "../../types";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-import { Card, CardBody, CardHeader, CardTitle } from "../../components/ui/card";
+import { Card, CardBody, CardTitle } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 
-interface FilaEntradaProps {
+interface TarjetaEntradaProps {
   entrada: MenuEntrada;
   onPrecio: (id: number, precio: number) => void;
   onDisponible: (entrada: MenuEntrada) => void;
@@ -16,79 +16,92 @@ interface FilaEntradaProps {
   onQuitar: (id: number) => void;
 }
 
-function FilaEntrada({
+function TarjetaEntrada({
   entrada,
   onPrecio,
   onDisponible,
   onEspecial,
   onQuitar,
-}: FilaEntradaProps) {
+}: TarjetaEntradaProps) {
   const [precio, setPrecio] = useState(String(entrada.precio));
   const precioNumero = Number(precio);
-  const precioValido = precio.trim() !== "" && !Number.isNaN(precioNumero) && precioNumero >= 0;
+  const precioValido =
+    precio.trim() !== "" && !Number.isNaN(precioNumero) && precioNumero >= 0;
 
   return (
-    <li className="flex flex-wrap items-center gap-3 py-3">
-      <div className="min-w-40 flex-1">
-        <p className="truncate font-semibold text-on-surface">{entrada.nombre}</p>
-        <p className="truncate text-sm text-on-surface-variant">
-          {entrada.categoria ?? "Sin categoría"} · costo actual{" "}
-          {formatoMoneda(entrada.precio)}
-        </p>
-      </div>
+    <Card className={!entrada.disponible ? "opacity-70" : ""}>
+      <CardBody className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="truncate font-heading text-lg font-bold text-on-surface">
+              {entrada.nombre}
+            </h3>
+            <p className="truncate text-sm text-on-surface-variant">
+              {entrada.categoria ?? "Sin categoría"}
+            </p>
+          </div>
+          <button
+            type="button"
+            aria-pressed={entrada.especial}
+            onClick={() => onEspecial(entrada)}
+            className="shrink-0"
+          >
+            <Badge
+              className={
+                entrada.especial
+                  ? "bg-tertiary-container text-on-tertiary-container"
+                  : "bg-surface-container text-on-surface-variant"
+              }
+            >
+              {entrada.especial ? "Especial" : "Marcar especial"}
+            </Badge>
+          </button>
+        </div>
 
-      <div className="flex items-center gap-2">
-        <Label htmlFor={`precio-${entrada.id}`} className="mb-0 text-xs">
-          Precio
-        </Label>
-        <Input
-          id={`precio-${entrada.id}`}
-          type="number"
-          min={0}
-          step="0.5"
-          value={precio}
-          onChange={(e) => setPrecio(e.target.value)}
-          className="h-9 w-24 text-sm"
-        />
-        <Button
-          variante="ghost"
-          disabled={!precioValido || precioNumero === entrada.precio}
-          onClick={() => onPrecio(entrada.id, precioNumero)}
-          className="h-9 min-h-0 px-3 text-sm"
-        >
-          Guardar
-        </Button>
-      </div>
+        <div className="flex items-center gap-2">
+          <Label htmlFor={`precio-${entrada.id}`} className="mb-0 text-xs">
+            Precio
+          </Label>
+          <Input
+            id={`precio-${entrada.id}`}
+            type="number"
+            min={0}
+            step="0.5"
+            value={precio}
+            onChange={(e) => setPrecio(e.target.value)}
+            className="h-9 w-24 text-sm"
+          />
+          <Button
+            variante="ghost"
+            disabled={!precioValido || precioNumero === entrada.precio}
+            onClick={() => onPrecio(entrada.id, precioNumero)}
+            className="h-9 min-h-0 px-3 text-sm"
+          >
+            Guardar
+          </Button>
+          <span className="ml-auto font-bold text-primary">
+            {formatoMoneda(entrada.precio)}
+          </span>
+        </div>
 
-      <div className="flex items-center gap-2">
-        {entrada.especial && (
-          <Badge className="bg-tertiary-container text-on-tertiary-container">
-            Especial
-          </Badge>
-        )}
-        <Button
-          variante={entrada.disponible ? "secondary" : "primary"}
-          onClick={() => onDisponible(entrada)}
-          className="h-9 min-h-0 px-3 text-sm"
-        >
-          {entrada.disponible ? "Marcar no disponible" : "Marcar disponible"}
-        </Button>
-        <Button
-          variante="ghost"
-          onClick={() => onEspecial(entrada)}
-          className="h-9 min-h-0 px-3 text-sm"
-        >
-          {entrada.especial ? "Quitar especial" : "Hacer especial"}
-        </Button>
-        <Button
-          variante="danger"
-          onClick={() => onQuitar(entrada.id)}
-          className="h-9 min-h-0 px-3 text-sm"
-        >
-          Quitar
-        </Button>
-      </div>
-    </li>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variante={entrada.disponible ? "secondary" : "primary"}
+            onClick={() => onDisponible(entrada)}
+            className="h-11 min-h-[44px] px-4 text-sm"
+          >
+            {entrada.disponible ? "Disponible" : "No disponible"}
+          </Button>
+          <Button
+            variante="danger"
+            onClick={() => onQuitar(entrada.id)}
+            className="h-11 min-h-[44px] px-4 text-sm"
+          >
+            Quitar del menú
+          </Button>
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -222,6 +235,9 @@ export function MenuDiaPage() {
   }
 
   async function quitar(id: number) {
+    if (!window.confirm("¿Quitar este platillo del menú?")) {
+      return;
+    }
     setError("");
     try {
       await api.del(`/menu/${id}`);
@@ -231,23 +247,35 @@ export function MenuDiaPage() {
     }
   }
 
+  const esHoy = fecha === hoyISO();
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Menú del día</CardTitle>
-        </CardHeader>
-        <CardBody className="space-y-5">
-          <div className="max-w-xs">
-            <Label htmlFor="fecha">Fecha</Label>
-            <Input
-              id="fecha"
-              type="date"
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
-            />
-          </div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="font-heading text-2xl font-bold text-on-surface">
+            Menú del día
+          </h1>
+          {esHoy && (
+            <Badge className="bg-primary-container text-on-primary-container">
+              Menú de hoy
+            </Badge>
+          )}
+        </div>
+        <div className="w-full max-w-xs">
+          <Label htmlFor="fecha">Fecha</Label>
+          <Input
+            id="fecha"
+            type="date"
+            value={fecha}
+            onChange={(e) => setFecha(e.target.value)}
+          />
+        </div>
+      </div>
 
+      <Card>
+        <CardBody className="space-y-4">
+          <CardTitle>Agregar al menú</CardTitle>
           <form onSubmit={agregar} className="grid gap-4 sm:grid-cols-2" noValidate>
             <div>
               <Label htmlFor="platillo">Platillo</Label>
@@ -299,48 +327,61 @@ export function MenuDiaPage() {
               </label>
             </div>
             <div className="sm:col-span-2">
-              <Button type="submit" disabled={enviando || platilloId === "" || precio === ""}>
+              <Button
+                type="submit"
+                disabled={enviando || platilloId === "" || precio === ""}
+              >
                 {enviando ? "Agregando…" : "Agregar al menú"}
               </Button>
             </div>
           </form>
-
-          {error && (
-            <p role="alert" className="text-sm font-medium text-danger">
-              {error}
-            </p>
-          )}
-          {mensaje && <p className="text-sm font-medium text-primary">{mensaje}</p>}
         </CardBody>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Platillos del {fecha}</CardTitle>
-        </CardHeader>
-        <CardBody>
-          {cargando ? (
-            <p className="text-on-surface-variant">Cargando…</p>
-          ) : entradas.length === 0 ? (
-            <p className="text-on-surface-variant">
-              No hay platillos en el menú de esta fecha.
+      {error && (
+        <div
+          role="alert"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-danger bg-danger-container px-4 py-3"
+        >
+          <p className="text-sm font-medium text-on-danger-container">{error}</p>
+          <Button
+            variante="secondary"
+            className="h-9 min-h-0 px-4 text-sm"
+            onClick={() => void cargar()}
+          >
+            Reintentar
+          </Button>
+        </div>
+      )}
+      {mensaje && <p className="text-sm font-medium text-primary">{mensaje}</p>}
+
+      {cargando ? (
+        <p className="text-sm text-on-surface-variant">Cargando…</p>
+      ) : entradas.length === 0 ? (
+        <Card>
+          <CardBody className="py-10 text-center">
+            <p className="font-heading text-lg font-bold text-on-surface">
+              No hay menú publicado para esta fecha
             </p>
-          ) : (
-            <ul className="divide-y divide-outline-variant">
-              {entradas.map((entrada) => (
-                <FilaEntrada
-                  key={entrada.id}
-                  entrada={entrada}
-                  onPrecio={guardarPrecio}
-                  onDisponible={cambiarDisponible}
-                  onEspecial={cambiarEspecial}
-                  onQuitar={quitar}
-                />
-              ))}
-            </ul>
-          )}
-        </CardBody>
-      </Card>
+            <p className="mt-2 text-sm text-on-surface-variant">
+              Usa el formulario de arriba para agregar platillos.
+            </p>
+          </CardBody>
+        </Card>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {entradas.map((entrada) => (
+            <TarjetaEntrada
+              key={entrada.id}
+              entrada={entrada}
+              onPrecio={guardarPrecio}
+              onDisponible={cambiarDisponible}
+              onEspecial={cambiarEspecial}
+              onQuitar={quitar}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

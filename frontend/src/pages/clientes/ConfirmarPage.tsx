@@ -1,12 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, ApiError } from "../../lib/apiClient";
-import {
-  cambiarCantidad,
-  quitar,
-  useCarrito,
-  vaciar,
-} from "../../lib/carrito";
+import { cambiarCantidad, quitar, useCarrito, vaciar } from "../../lib/carrito";
 import { fechaHoraLocal, formatoMoneda } from "../../lib/utils";
 import type { PedidoDetalle } from "../../types";
 import { Card, CardBody, CardTitle } from "../../components/ui/card";
@@ -16,14 +11,14 @@ import { Label } from "../../components/ui/label";
 
 const MINUTOS_MINIMOS = 10;
 
-export function CarritoPage() {
+export function ConfirmarPage() {
   const navigate = useNavigate();
   const { items, total, cantidad } = useCarrito();
   const [fecha, setFecha] = useState(fechaHoraLocal(15));
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  async function confirmar() {
+  async function continuar() {
     setError("");
     const fechaDate = new Date(fecha);
     if (Number.isNaN(fechaDate.getTime())) {
@@ -47,7 +42,7 @@ export function CarritoPage() {
         })),
       });
       vaciar();
-      navigate(`/pago/${pedido.id}`);
+      navigate(`/pedido/${pedido.id}/pago`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "No se pudo crear el pedido");
     } finally {
@@ -58,13 +53,13 @@ export function CarritoPage() {
   if (cantidad === 0) {
     return (
       <Card>
-        <CardBody>
+        <CardBody className="flex flex-col items-center gap-3 py-10 text-center">
           <CardTitle>Tu carrito está vacío</CardTitle>
-          <p className="mt-2 text-on-surface-variant">
+          <p className="text-sm text-on-surface-variant">
             Agrega platillos desde el menú para hacer un pedido anticipado.
           </p>
-          <Link to="/menu" className="mt-4 inline-block">
-            <Button>Ver menú</Button>
+          <Link to="/menu">
+            <Button>Volver al menú</Button>
           </Link>
         </CardBody>
       </Card>
@@ -73,8 +68,8 @@ export function CarritoPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-2xl font-bold text-on-surface">
-        Tu pedido
+      <h1 className="font-heading text-2xl font-bold text-on-surface">
+        Revisa tu pedido
       </h1>
 
       <Card>
@@ -92,7 +87,7 @@ export function CarritoPage() {
                   variante="secondary"
                   aria-label={`Quitar uno de ${item.nombre}`}
                   onClick={() => cambiarCantidad(item.menu_dia_id, item.cantidad - 1)}
-                  className="h-9 min-h-0 w-9 px-0 text-lg"
+                  className="h-11 w-11 px-0 text-lg"
                 >
                   −
                 </Button>
@@ -103,7 +98,7 @@ export function CarritoPage() {
                   variante="secondary"
                   aria-label={`Agregar uno de ${item.nombre}`}
                   onClick={() => cambiarCantidad(item.menu_dia_id, item.cantidad + 1)}
-                  className="h-9 min-h-0 w-9 px-0 text-lg"
+                  className="h-11 w-11 px-0 text-lg"
                 >
                   +
                 </Button>
@@ -117,7 +112,7 @@ export function CarritoPage() {
                 onClick={() => quitar(item.menu_dia_id)}
                 className="px-2 text-sm text-danger"
               >
-                Quitar
+                ×
               </Button>
             </div>
           ))}
@@ -143,10 +138,14 @@ export function CarritoPage() {
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-on-surface-variant">Total</span>
-            <span className="font-display text-xl font-bold text-primary">
+            <span className="font-heading text-2xl font-bold text-primary">
               {formatoMoneda(total)}
             </span>
           </div>
+
+          <p className="text-sm text-on-surface-variant">
+            Recogida presencial en la cafetería.
+          </p>
 
           {error && (
             <p role="alert" className="text-sm font-medium text-danger">
@@ -154,8 +153,8 @@ export function CarritoPage() {
             </p>
           )}
 
-          <Button onClick={confirmar} disabled={enviando} className="w-full">
-            {enviando ? "Creando pedido…" : "Confirmar pedido"}
+          <Button onClick={continuar} disabled={enviando} className="h-12 w-full">
+            {enviando ? "Creando pedido…" : "Continuar al pago"}
           </Button>
         </CardBody>
       </Card>

@@ -5,8 +5,15 @@ import {
   cerrarBaseDatos,
   eliminarPedidoPorId,
   eliminarPlatilloPorNombre,
+  eliminarUsuarioConPedidos,
 } from "../helpers/db.js";
-import { CUENTAS, crearMenuDePrueba, login } from "../helpers/pedidos.js";
+import {
+  CUENTAS,
+  crearMenuDePrueba,
+  fechaLocal,
+  login,
+  registrarYLogin,
+} from "../helpers/pedidos.js";
 
 const app = createApp();
 const NOMBRE = "TEST Platillo Cocina";
@@ -70,9 +77,40 @@ describe("GET /api/cocina/pedidos", () => {
     expect(pedido).toBeTruthy();
     expect(pedido.estado).toBe("Pagado");
     expect(pedido.tipo).toBe("mostrador");
+    expect(pedido.cliente_nombre).toBeNull();
+    expect(pedido.creado_en).toBeTruthy();
     expect(pedido.items).toHaveLength(1);
     expect(pedido.items[0].cantidad).toBe(2);
     expect(pedido.items[0].nombre).toBe(NOMBRE);
+  });
+
+  it("expone el nombre del cliente en pedidos anticipados", async () => {
+    const correo = `cocina-nombre-${Date.now()}@itsh.edu.mx`;
+    const clienteToken = await registrarYLogin(app, correo);
+    const creado = await request(app)
+      .post("/api/pedidos")
+      .set("Authorization", `Bearer ${clienteToken}`)
+      .send({
+        fecha_recoleccion: fechaLocal(30),
+        items: [{ menu_dia_id: menuDiaId, cantidad: 1 }],
+      });
+    const id = creado.body.id as number;
+    pedidosCreados.push(id);
+    await request(app)
+      .post(`/api/pedidos/${id}/pagar`)
+      .set("Authorization", `Bearer ${clienteToken}`)
+      .send({ token_pago: "tok_ok_demo" });
+
+    const res = await request(app)
+      .get("/api/cocina/pedidos")
+      .set("Authorization", `Bearer ${cocinaToken}`);
+
+    const pedido = res.body.find((p: { id: number }) => p.id === id);
+    expect(pedido).toBeTruthy();
+    expect(pedido.cliente_nombre).toBe("Cliente de prueba");
+    expect(pedido.tipo).toBe("anticipado");
+
+    await eliminarUsuarioConPedidos(correo);
   });
 
   it("rechaza a un cajero (403)", async () => {
@@ -154,7 +192,7 @@ describe("POST /api/cocina/pedidos/:id/listo", () => {
     expect(res.status).toBe(409);
   });
 
-  it("un pedido Listo ya no aparece en la lista de cocina", async () => {
+  it("mantiene visible un pedido Listo (en espera de caja)", async () => {
     const id = await pedidoPagado();
     await request(app)
       .post(`/api/cocina/pedidos/${id}/iniciar`)
@@ -166,6 +204,8 @@ describe("POST /api/cocina/pedidos/:id/listo", () => {
     const res = await request(app)
       .get("/api/cocina/pedidos")
       .set("Authorization", `Bearer ${cocinaToken}`);
-    expect(res.body.some((p: { id: number }) => p.id === id)).toBe(false);
+    const pedido = res.body.find((p: { id: number }) => p.id === id);
+    expect(pedido).toBeTruthy();
+    expect(pedido.estado).toBe("Listo");
   });
 });

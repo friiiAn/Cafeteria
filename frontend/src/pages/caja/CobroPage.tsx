@@ -1,18 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, ApiError } from "../../lib/apiClient";
-import { cn, formatoMoneda } from "../../lib/utils";
+import { formatoMoneda } from "../../lib/utils";
 import type { PagoConfirmado, PedidoDetalle } from "../../types";
 import { Card, CardBody, CardTitle } from "../../components/ui/card";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
-
-const METODOS = [
-  { valor: "efectivo", etiqueta: "Efectivo" },
-  { valor: "tarjeta", etiqueta: "Tarjeta" },
-] as const;
-
-type Metodo = (typeof METODOS)[number]["valor"];
 
 export function CobroPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,8 +13,8 @@ export function CobroPage() {
   const [pedido, setPedido] = useState<PedidoDetalle | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
-  const [metodo, setMetodo] = useState<Metodo>("efectivo");
   const [cobrando, setCobrando] = useState(false);
+  const [cancelando, setCancelando] = useState(false);
   const [pago, setPago] = useState<PagoConfirmado | null>(null);
 
   useEffect(() => {
@@ -54,7 +47,7 @@ export function CobroPage() {
     try {
       const resultado = await api.post<PagoConfirmado>(
         `/caja/pedidos/${id}/cobrar`,
-        { metodo },
+        { metodo: "efectivo" },
       );
       setPago(resultado);
       setPedido((previo) =>
@@ -64,6 +57,19 @@ export function CobroPage() {
       setError(err instanceof ApiError ? err.message : "No se pudo cobrar el pedido");
     } finally {
       setCobrando(false);
+    }
+  }
+
+  async function cancelar() {
+    setError("");
+    setCancelando(true);
+    try {
+      await api.post(`/caja/pedidos/${id}/cancelar`);
+      navigate("/caja");
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "No se pudo cancelar el pedido");
+    } finally {
+      setCancelando(false);
     }
   }
 
@@ -86,20 +92,28 @@ export function CobroPage() {
   }
 
   const pagado = pedido.estado === "Pagado";
+  const exito = Boolean(pago) || pagado;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <h1 className="font-display text-2xl font-bold text-on-surface">
-          Cobro {pedido.numero}
-        </h1>
-        <Badge className="bg-primary-container text-on-primary-container">
+        <h1 className="font-heading text-2xl font-bold text-on-surface">Cobro</h1>
+        <Badge
+          className={
+            exito
+              ? "bg-status-paid text-white"
+              : "bg-surface-container text-on-surface-variant"
+          }
+        >
           {pedido.estado}
         </Badge>
       </div>
 
       <Card>
         <CardBody className="space-y-3">
+          <p className="font-mono text-lg font-semibold text-on-surface">
+            {pedido.numero}
+          </p>
           <ul className="divide-y divide-outline-variant">
             {pedido.items.map((item) => (
               <li
@@ -116,52 +130,36 @@ export function CobroPage() {
             ))}
           </ul>
           <div className="flex items-center justify-between border-t border-outline-variant pt-3">
-            <span className="text-sm text-on-surface-variant">Total a cobrar</span>
-            <span className="font-display text-xl font-bold text-primary">
+            <span className="text-sm text-on-surface-variant">Total</span>
+            <span className="font-heading text-2xl font-bold text-primary">
               {formatoMoneda(pedido.total)}
             </span>
           </div>
         </CardBody>
       </Card>
 
-      {pago || pagado ? (
+      {exito ? (
         <Card>
           <CardBody className="space-y-3">
-            <CardTitle>Cobro registrado</CardTitle>
+            <CardTitle>Cobro confirmado</CardTitle>
             <p className="text-on-surface-variant">
-              Método: {pago?.pago.metodo ?? "—"} · Total{" "}
-              {formatoMoneda(pago?.pago.monto ?? pedido.total)}
+              Cobro confirmado: folio{" "}
+              <span className="font-mono font-bold text-on-surface">
+                {pedido.numero}
+              </span>
             </p>
             <p className="text-sm text-on-surface-variant">
               El pedido pasó a <strong>Pagado</strong> y ya es visible en cocina.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <Button onClick={() => navigate("/caja")}>Nuevo pedido</Button>
-            </div>
+            <Button onClick={() => navigate("/caja/nuevo")}>Nuevo pedido</Button>
           </CardBody>
         </Card>
       ) : (
         <Card>
           <CardBody className="space-y-4">
-            <CardTitle>Método de pago</CardTitle>
-            <div className="grid grid-cols-2 gap-3">
-              {METODOS.map((opcion) => (
-                <button
-                  key={opcion.valor}
-                  type="button"
-                  aria-pressed={metodo === opcion.valor}
-                  onClick={() => setMetodo(opcion.valor)}
-                  className={cn(
-                    "flex h-12 min-h-[44px] items-center justify-center rounded-lg border text-base font-semibold transition",
-                    metodo === opcion.valor
-                      ? "border-primary bg-primary-container text-on-primary-container"
-                      : "border-outline-variant text-on-surface-variant hover:bg-surface-container",
-                  )}
-                >
-                  {opcion.etiqueta}
-                </button>
-              ))}
-            </div>
+            <p className="text-sm text-on-surface-variant">
+              El pedido se registra y cobra en efectivo en un solo paso.
+            </p>
 
             {error && (
               <p role="alert" className="text-sm font-medium text-danger">
@@ -170,8 +168,27 @@ export function CobroPage() {
             )}
 
             <Button onClick={cobrar} disabled={cobrando} className="w-full">
-              {cobrando ? "Cobrando…" : `Cobrar ${formatoMoneda(pedido.total)}`}
+              {cobrando ? "Cobrando…" : `Registrar y cobrar ${formatoMoneda(pedido.total)}`}
             </Button>
+
+            {error && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  variante="secondary"
+                  onClick={cobrar}
+                  disabled={cobrando}
+                >
+                  Reintentar cobro
+                </Button>
+                <Button
+                  variante="ghost"
+                  onClick={cancelar}
+                  disabled={cancelando}
+                >
+                  {cancelando ? "Cancelando…" : "Cancelar pedido"}
+                </Button>
+              </div>
+            )}
           </CardBody>
         </Card>
       )}

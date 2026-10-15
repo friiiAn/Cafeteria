@@ -490,13 +490,25 @@ export async function entregar(
 
 export async function listarParaEntrega(): Promise<PedidoEntrega[]> {
   const filas = await pedidoRepo.listarListos();
+  if (filas.length === 0) {
+    return [];
+  }
+  const items = await pedidoRepo.listarItemsDePedidos(filas.map((fila) => fila.id));
+  const porPedido = new Map<number, { cantidad: number; nombre: string }[]>();
+  for (const item of items) {
+    const acumulado = porPedido.get(item.pedido_id) ?? [];
+    acumulado.push({ cantidad: item.cantidad, nombre: item.nombre });
+    porPedido.set(item.pedido_id, acumulado);
+  }
   return filas.map((fila) => ({
     id: fila.id,
     numero: fila.numero,
     tipo: fila.tipo,
     cliente_nombre: fila.cliente_nombre,
     total: Number(fila.total),
+    creado_en: formatoFechaHora(fila.creado_en),
     fecha_recoleccion: formatoFechaHora(fila.fecha_recoleccion),
+    items: porPedido.get(fila.id) ?? [],
   }));
 }
 

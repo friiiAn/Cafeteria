@@ -38,7 +38,9 @@ export interface PedidoEntrega {
   tipo: string;
   cliente_nombre: string | null;
   total: number;
+  creado_en: string;
   fecha_recoleccion: string;
+  items: ItemCocina[];
 }
 
 export interface PedidoDetalle extends PedidoResumen {
@@ -70,6 +72,8 @@ export interface PedidoCocina {
   numero: string;
   tipo: string;
   estado: string;
+  cliente_nombre: string | null;
+  creado_en: string;
   fecha_recoleccion: string;
   items: ItemCocina[];
 }

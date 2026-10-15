@@ -3,6 +3,7 @@ import { cn, formatoMoneda } from "../lib/utils";
 import { Card, CardBody } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { Stepper } from "./Stepper";
 
 interface PlatilloCardProps {
   entrada: MenuEntrada;
@@ -55,27 +56,13 @@ export function PlatilloCard({
           )}
 
           {seleccionable && cantidad > 0 && onCambiarCantidad ? (
-            <div className="ml-auto flex items-center gap-2">
-              <Button
-                variante="secondary"
-                aria-label={`Quitar uno de ${entrada.nombre}`}
-                disabled={!entrada.disponible}
-                onClick={() => onCambiarCantidad(entrada, cantidad - 1)}
-                className="h-9 min-h-0 w-9 px-0 text-lg"
-              >
-                −
-              </Button>
-              <span className="min-w-6 text-center font-semibold">{cantidad}</span>
-              <Button
-                variante="secondary"
-                aria-label={`Agregar uno de ${entrada.nombre}`}
-                disabled={!entrada.disponible}
-                onClick={() => onCambiarCantidad(entrada, cantidad + 1)}
-                className="h-9 min-h-0 w-9 px-0 text-lg"
-              >
-                +
-              </Button>
-            </div>
+            <Stepper
+              className="ml-auto"
+              cantidad={cantidad}
+              etiqueta={entrada.nombre}
+              deshabilitado={!entrada.disponible}
+              onCambiar={(nueva) => onCambiarCantidad(entrada, nueva)}
+            />
           ) : (
             onAgregar && (
               <Button

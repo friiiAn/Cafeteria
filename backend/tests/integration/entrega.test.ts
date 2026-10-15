@@ -86,6 +86,12 @@ describe("GET /api/caja/pedidos", () => {
     const ids = res.body.map((p: { id: number }) => p.id);
     expect(ids).toContain(listoId);
     expect(ids).not.toContain(pagadoId);
+
+    const fila = res.body.find((p: { id: number }) => p.id === listoId);
+    expect(fila.creado_en).toBeTruthy();
+    expect(fila.items).toHaveLength(1);
+    expect(fila.items[0].cantidad).toBe(1);
+    expect(fila.items[0].nombre).toBe(NOMBRE);
   });
 });
 

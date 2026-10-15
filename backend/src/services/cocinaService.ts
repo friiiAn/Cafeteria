@@ -25,6 +25,8 @@ export async function listar(): Promise<PedidoCocina[]> {
     numero: pedido.numero,
     tipo: pedido.tipo,
     estado: pedido.estado,
+    cliente_nombre: pedido.cliente_nombre,
+    creado_en: formatoFechaHora(pedido.creado_en),
     fecha_recoleccion: formatoFechaHora(pedido.fecha_recoleccion),
     items: porPedido.get(pedido.id) ?? [],
   }));
