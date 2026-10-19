@@ -31,12 +31,12 @@ independientes.
 
 **Purpose**: Inicializar la estructura del proyecto.
 
-- [ ] T001 Renombrar `fronted/` → `frontend/` y actualizar referencias internas
-- [ ] T002 [P] Inicializar backend TypeScript en `backend/` (tsconfig, deps: express, mysql2, jsonwebtoken, bcryptjs, zod, cors, helmet, dotenv; devDeps: typescript, tsx, vitest, supertest, @types/*)
-- [ ] T003 [P] Migrar scaffold de `frontend/` a TypeScript (`vite.config.ts`, `tsconfig.json`, `main.tsx`, `App.tsx`) y añadir react-router-dom, tailwindcss, shadcn/ui, vitest
+- [x] T001 Renombrar `fronted/` → `frontend/` y actualizar referencias internas
+- [x] T002 [P] Inicializar backend TypeScript en `backend/` (tsconfig, deps: express, mysql2, jsonwebtoken, bcryptjs, zod, cors, helmet, dotenv; devDeps: typescript, tsx, vitest, supertest, @types/*)
+- [x] T003 [P] Migrar scaffold de `frontend/` a TypeScript (`vite.config.ts`, `tsconfig.json`, `main.tsx`, `App.tsx`) y añadir react-router-dom, tailwindcss, shadcn/ui, vitest
 - [ ] T004 [P] Configurar scripts `dev`, `test`, `typecheck`, `lint` en ambos `package.json`
-- [ ] T005 [P] Crear `backend/.env.example` y `frontend/.env.example`; añadir `.env` a `.gitignore`
-- [ ] T006 [P] Configurar Tailwind y los tokens de `docs/DESIGN.md` en `frontend/src/index.css` y `tailwind.config.ts`
+- [x] T005 [P] Crear `backend/.env.example` y `frontend/.env.example`; añadir `.env` a `.gitignore`
+- [x] T006 [P] Configurar Tailwind y los tokens de `docs/DESIGN.md` en `frontend/src/index.css` y `tailwind.config.ts`
 
 **Checkpoint**: Estructura lista para el trabajo base.
 
@@ -48,15 +48,15 @@ independientes.
 
 **⚠️ CRITICAL**: Ninguna user story puede empezar hasta completar esta fase.
 
-- [ ] T007 Verificar/aplicar migraciones MySQL `migrations/001_crear_esquema.sql` y `002_seed_inicial.sql` (11 tablas + seed)
-- [ ] T008 Implementar carga de entorno y `mysql2` pool en `backend/src/config/env.ts` y `backend/src/db/pool.ts`
-- [ ] T009 [P] Implementar utilidades de contraseña (bcrypt) en `backend/src/utils/password.ts`
-- [ ] T010 [P] Implementar utilidades JWT (firmar/verificar) en `backend/src/utils/jwt.ts`
-- [ ] T011 [P] Implementar `httpError` y `logger` en `backend/src/utils/`
-- [ ] T012 Implementar middleware de errores y de validación (`zod`) en `backend/src/middlewares/errorHandler.ts` y `validate.ts`
-- [ ] T013 Implementar `app.ts` con `cors`, `helmet`, `express.json()` y montaje de `/api`
-- [ ] T014 Implementar `server.ts` (arranque y cierre del pool)
-- [ ] T015 Seed de cuentas operativas iniciales (admin, cajero, cocinero) con contraseñas hasheadas (script idempotente `backend/scripts/seed-usuarios.ts`)
+- [x] T007 Verificar/aplicar migraciones MySQL `migrations/001_crear_esquema.sql` y `002_seed_inicial.sql` (11 tablas + seed)
+- [x] T008 Implementar carga de entorno y `mysql2` pool en `backend/src/config/env.ts` y `backend/src/db/pool.ts`
+- [x] T009 [P] Implementar utilidades de contraseña (bcrypt) en `backend/src/utils/password.ts`
+- [x] T010 [P] Implementar utilidades JWT (firmar/verificar) en `backend/src/utils/jwt.ts`
+- [x] T011 [P] Implementar `httpError` y `logger` en `backend/src/utils/`
+- [x] T012 Implementar middleware de errores y de validación (`zod`) en `backend/src/middlewares/errorHandler.ts` y `validate.ts`
+- [x] T013 Implementar `app.ts` con `cors`, `helmet`, `express.json()` y montaje de `/api`
+- [x] T014 Implementar `server.ts` (arranque y cierre del pool)
+- [x] T015 Seed de cuentas operativas iniciales (admin, cajero, cocinero) con contraseñas hasheadas (script idempotente `backend/scripts/seed-usuarios.ts`)
 
 **Checkpoint**: Base lista — las user stories pueden empezar.
 
@@ -71,20 +71,20 @@ sesión → `/login`.
 
 ### Tests for User Story 1
 
-- [ ] T016 [P] [US1] Unit test de `password` (hash/compare) en `backend/tests/unit/password.test.ts`
-- [ ] T017 [P] [US1] Unit test de `jwt` (firma/expiración/verificación) en `backend/tests/unit/jwt.test.ts`
-- [ ] T018 [P] [US1] Integration test de `POST /api/auth/login` y `GET /api/auth/me` en `backend/tests/integration/auth.test.ts`
-- [ ] T019 [P] [US1] Integration test de RBAC (401/403) en `backend/tests/integration/rbac.test.ts`
+- [x] T016 [P] [US1] Unit test de `password` (hash/compare) en `backend/tests/unit/password.test.ts`
+- [x] T017 [P] [US1] Unit test de `jwt` (firma/expiración/verificación) en `backend/tests/unit/jwt.test.ts`
+- [x] T018 [P] [US1] Integration test de `POST /api/auth/login` y `GET /api/auth/me` en `backend/tests/integration/auth.test.ts`
+- [x] T019 [P] [US1] Integration test de RBAC (401/403) en `backend/tests/integration/rbac.test.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implementar `authService` (login, verificación de activo, emisión de token) en `backend/src/services/authService.ts`
-- [ ] T021 [US1] Implementar `authController` y `auth.routes.ts` (`/login`, `/me`) en `backend/src/`
-- [ ] T022 [US1] Implementar middleware `requireAuth` y `requireRole` en `backend/src/middlewares/`
-- [ ] T023 [P] [US1] Crear `AuthContext` y `apiClient` en `frontend/src/contexts/` y `frontend/src/lib/`
-- [ ] T024 [US1] Crear `LoginPage` en `frontend/src/pages/LoginPage.tsx` con validación y mensajes genéricos
-- [ ] T025 [US1] Crear `ProtectedRoute` por rol y el router en `frontend/src/App.tsx`
-- [ ] T026 [P] [US1] Crear layouts y navegación por rol en `frontend/src/components/layouts/`
+- [x] T020 [US1] Implementar `authService` (login, verificación de activo, emisión de token) en `backend/src/services/authService.ts`
+- [x] T021 [US1] Implementar `authController` y `auth.routes.ts` (`/login`, `/me`) en `backend/src/`
+- [x] T022 [US1] Implementar middleware `requireAuth` y `requireRole` en `backend/src/middlewares/`
+- [x] T023 [P] [US1] Crear `AuthContext` y `apiClient` en `frontend/src/contexts/` y `frontend/src/lib/`
+- [x] T024 [US1] Crear `LoginPage` en `frontend/src/pages/LoginPage.tsx` con validación y mensajes genéricos
+- [x] T025 [US1] Crear `ProtectedRoute` por rol y el router en `frontend/src/App.tsx`
+- [x] T026 [P] [US1] Crear layouts y navegación por rol en `frontend/src/components/layouts/`
 
 **Checkpoint**: US1 funcional y testeable de forma independiente.
 
@@ -99,13 +99,13 @@ rechazado; datos inválidos rechazados.
 
 ### Tests for User Story 2
 
-- [ ] T027 [P] [US2] Integration test de `POST /api/auth/register` (éxito, duplicado, inválido) en `backend/tests/integration/register.test.ts`
+- [x] T027 [P] [US2] Integration test de `POST /api/auth/register` (éxito, duplicado, inválido) en `backend/tests/integration/register.test.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T028 [US2] Implementar `register` en `authService` (rol fijo `usuario`, hash de contraseña) en `backend/src/services/authService.ts`
-- [ ] T029 [US2] Exponer `POST /api/auth/register` en `auth.routes.ts` con esquema `zod`
-- [ ] T030 [US2] Crear `RegisterPage` en `frontend/src/pages/RegisterPage.tsx` con validación y enlace desde login
+- [x] T028 [US2] Implementar `register` en `authService` (rol fijo `usuario`, hash de contraseña) en `backend/src/services/authService.ts`
+- [x] T029 [US2] Exponer `POST /api/auth/register` en `auth.routes.ts` con esquema `zod`
+- [x] T030 [US2] Crear `RegisterPage` en `frontend/src/pages/RegisterPage.tsx` con validación y enlace desde login
 
 **Checkpoint**: US1 y US2 funcionan de forma independiente.
 
@@ -120,14 +120,14 @@ deshabilitada no puede iniciar sesión; no-admin recibe 403.
 
 ### Tests for User Story 3
 
-- [ ] T031 [P] [US3] Integration test de `/api/usuarios` (CRUD + 403) en `backend/tests/integration/usuarios.test.ts`
+- [x] T031 [P] [US3] Integration test de `/api/usuarios` (CRUD + 403) en `backend/tests/integration/usuarios.test.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T032 [US3] Implementar `usuarioService` (listar, crear, editar, desactivar) en `backend/src/services/usuarioService.ts`
-- [ ] T033 [US3] Implementar `usuarioController` y `usuario.routes.ts` protegido con `requireRole('administrador')`
-- [ ] T034 [US3] Crear `UsuariosPage` (listado + alta + edición + desactivar) en `frontend/src/pages/admin/UsuariosPage.tsx`
-- [ ] T035 [US3] Proteger la ruta `/admin` solo para administrador en `frontend/src/App.tsx`
+- [x] T032 [US3] Implementar `usuarioService` (listar, crear, editar, desactivar) en `backend/src/services/usuarioService.ts`
+- [x] T033 [US3] Implementar `usuarioController` y `usuario.routes.ts` protegido con `requireRole('administrador')`
+- [x] T034 [US3] Crear `UsuariosPage` (listado + alta + edición + desactivar) en `frontend/src/pages/admin/UsuariosPage.tsx`
+- [x] T035 [US3] Proteger la ruta `/admin` solo para administrador en `frontend/src/App.tsx`
 
 **Checkpoint**: Las tres user stories funcionan de forma independiente.
 
@@ -135,7 +135,7 @@ deshabilitada no puede iniciar sesión; no-admin recibe 403.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T036 [P] Documentar endpoints y variables de entorno en `backend/README.md`
+- [x] T036 [P] Documentar endpoints y variables de entorno en `backend/README.md`
 - [ ] T037 [P] Añadir validación de límites y saneo de entradas en todos los controladores
 - [ ] T038 Verificar que no se exponen stack traces ni datos internos en respuestas de error
 - [ ] T039 [P] Añadir pruebas de tipo y ajustar `tsconfig` en frontend y backend
